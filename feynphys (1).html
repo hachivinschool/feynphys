@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeynPhys AI — Understand Physics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+:root{
+  --ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#9090b0;
+  --rule:#e8e8f0;--rule2:#d0d0e0;
+  --bg:#f8f8fc;--surface:#ffffff;--surface2:#f2f2f8;
+  --acc:#4361ee;--acc-l:#eef1ff;--acc-m:#c7d0fc;
+  --grn:#0d9488;--grn-l:#f0fdf9;
+  --amb:#d97706;--amb-l:#fffbeb;
+  --red:#dc2626;--red-l:#fef2f2;
+  --r:10px;--r2:16px;
+  --sans:'DM Sans',sans-serif;--serif:'DM Serif Display',serif;--mono:'DM Mono',monospace;
+  --sh:0 1px 3px rgba(26,26,46,.06),0 4px 16px rgba(26,26,46,.08);
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+button{font-family:var(--sans);cursor:pointer}
+canvas{display:block}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:200;height:56px;
+  background:rgba(248,248,252,.94);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--rule);
+  display:flex;align-items:center;padding:0 1.5rem;gap:8px;
+}
+.nav-brand{
+  display:flex;align-items:center;gap:9px;cursor:pointer;
+  font-family:var(--serif);font-size:1.2rem;color:var(--ink);letter-spacing:-.02em;margin-right:1.5rem;
+}
+.nav-mark{width:28px;height:28px;border-radius:7px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-weight:700;font-size:13px;color:#fff}
+.nav-tab{padding:6px 14px;border-radius:8px;border:none;background:none;font-size:14px;font-weight:500;color:var(--ink2);transition:all .15s}
+.nav-tab:hover{background:var(--surface2);color:var(--ink)}
+.nav-tab.active{background:var(--acc-l);color:var(--acc)}
+
+/* PAGES */
+.page{display:none;min-height:calc(100vh - 56px)}
+.page.active{display:block}
+
+/* HOME */
+.hero{max-width:680px;margin:0 auto;padding:5rem 2rem 3rem;text-align:center}
+.hero-eye{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);margin-bottom:1.25rem}
+.hero h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.12;letter-spacing:-.04em;margin-bottom:1.1rem}
+.hero h1 em{font-style:italic;color:var(--acc)}
+.hero-sub{font-size:1.05rem;color:var(--ink2);max-width:480px;margin:0 auto 2.25rem;font-weight:300;line-height:1.7}
+.hero-ctas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-lg{padding:11px 26px;border-radius:10px;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:all .18s}
+.btn-lg.primary{background:var(--acc);color:#fff}
+.btn-lg.primary:hover{background:#3451db;transform:translateY(-1px);box-shadow:0 4px 14px rgba(67,97,238,.28)}
+.btn-lg.ghost{background:transparent;color:var(--ink2);border:1.5px solid var(--rule2)}
+.btn-lg.ghost:hover{border-color:var(--acc-m);color:var(--acc);background:var(--acc-l)}
+
+.method-row{display:flex;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--surface);margin:2.5rem 0}
+.method-cell{flex:1;padding:1.5rem 1.25rem;border-right:1px solid var(--rule);text-align:center}
+.method-cell:last-child{border-right:none}
+.method-cell .ic{font-size:1.4rem;margin-bottom:.5rem}
+.method-cell h3{font-size:.85rem;font-weight:600;margin-bottom:.25rem}
+.method-cell p{font-size:.78rem;color:var(--ink3);line-height:1.45}
+
+.topics-home{max-width:960px;margin:0 auto;padding:2.5rem 2rem 4rem}
+.sec-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:1.1rem}
+.topics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.topic-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r2);padding:1.4rem;cursor:pointer;transition:all .2s;text-align:left}
+.topic-card:hover{border-color:var(--acc-m);box-shadow:var(--sh);transform:translateY(-2px)}
+.tc-icon{font-size:1.6rem;margin-bottom:.6rem}
+.tc-name{font-family:var(--serif);font-size:1.2rem;letter-spacing:-.02em;margin-bottom:.2rem}
+.tc-cnt{font-size:.75rem;color:var(--ink3);margin-bottom:.5rem}
+.tc-desc{font-size:.83rem;color:var(--ink2);line-height:1.5}
+.tc-arrow{margin-top:.875rem;font-size:.8rem;color:var(--acc);font-weight:500}
+
+/* LABS PAGE */
+#page-labs{display:none}
+#page-labs.active{display:flex;min-height:calc(100vh - 56px)}
+
+.sidebar{
+  width:252px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--rule);
+  overflow-y:auto;height:calc(100vh - 56px);
+  position:sticky;top:56px;
+}
+.sb-section{padding:.75rem .875rem .2rem;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.sb-topic-btn{
+  width:calc(100% - 12px);margin:2px 6px;padding:.6rem .875rem;
+  border:none;background:none;display:flex;align-items:center;gap:.6rem;
+  text-align:left;cursor:pointer;border-radius:9px;transition:background .12s;
+}
+.sb-topic-btn:hover{background:var(--surface2)}
+.sb-topic-btn.active{background:var(--acc-l)}
+.sb-topic-btn.active .stb-name{color:var(--acc)}
+.stb-icon{font-size:1rem;flex-shrink:0}
+.stb-name{font-size:.85rem;font-weight:500;color:var(--ink);flex:1}
+.stb-cnt{font-size:.7rem;color:var(--ink3)}
+.sb-labs{padding:.15rem .75rem .5rem}
+.sb-lab{
+  width:100%;padding:.4rem .75rem;border:none;background:none;
+  display:flex;align-items:center;gap:.5rem;text-align:left;
+  cursor:pointer;border-radius:7px;transition:background .12s;font-size:.8rem;color:var(--ink2);
+}
+.sb-lab:hover{background:var(--surface2);color:var(--ink)}
+.sb-lab.active{background:var(--acc);color:#fff}
+.sb-lab .sln{font-family:var(--mono);font-size:.68rem;opacity:.55;flex-shrink:0}
+
+.lab-main{flex:1;overflow-y:auto;height:calc(100vh - 56px)}
+.lab-topbar{
+  border-bottom:1px solid var(--rule);padding:1.1rem 1.75rem;
+  background:var(--surface);position:sticky;top:0;z-index:10;
+  display:flex;align-items:flex-start;gap:1rem;
+}
+.lab-topbar-txt{flex:1}
+.lab-eye{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:.25rem}
+.lab-topbar h2{font-family:var(--serif);font-size:1.4rem;letter-spacing:-.03em;line-height:1.2}
+.lab-meta{font-size:.78rem;color:var(--ink3);margin-top:.2rem}
+.nav-arrows{display:flex;gap:5px;padding-top:3px}
+.arr-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--rule2);background:var(--surface);font-size:.85rem;color:var(--ink2);transition:all .15s;display:flex;align-items:center;justify-content:center}
+.arr-btn:hover{background:var(--acc-l);border-color:var(--acc-m);color:var(--acc)}
+.arr-btn:disabled{opacity:.28;pointer-events:none}
+
+.exp-body{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 56px - 85px)}
+.exp-left{padding:1.4rem 1.75rem;border-right:1px solid var(--rule)}
+.exp-right{padding:1.25rem;background:var(--bg);display:flex;flex-direction:column;gap:1.1rem}
+
+/* sim */
+.sim-wrap{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r2);overflow:hidden;position:relative;margin-bottom:1.1rem}
+.sim-canvas{width:100%;height:340px}
+.sim-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(26,26,46,.55);color:#fff;font-size:.7rem;padding:4px 12px;border-radius:100px;pointer-events:none;white-space:nowrap;backdrop-filter:blur(8px)}
+
+/* controls */
+.ctrl-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r2);padding:1rem 1.1rem}
+.ctrl-title{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.8rem}
+.ctrl-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.65rem}
+.ctrl-row:last-child{margin-bottom:0}
+.ctrl-lbl{font-size:.78rem;color:var(--ink2);min-width:88px;flex-shrink:0}
+.ctrl-row input[type=range]{flex:1;-webkit-appearance:none;height:3px;border-radius:3px;background:var(--rule2);outline:none;cursor:pointer}
+.ctrl-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 1px 4px rgba(67,97,238,.3);transition:transform .1s}
+.ctrl-row input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.ctrl-val{font-family:var(--mono);font-size:.75rem;color:var(--acc);min-width:34px;text-align:right}
+.ctrl-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:.3rem}
+.ctrl-btn{padding:5px 13px;border-radius:7px;font-size:.78rem;font-weight:500;border:1.5px solid var(--rule2);background:var(--surface);color:var(--ink2);transition:all .15s}
+.ctrl-btn:hover{background:var(--acc-l);border-color:var(--acc-m);color:var(--acc)}
+.ctrl-btn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+
+/* info panel */
+.info-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r2);padding:1rem 1.1rem}
+.info-title{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.7rem}
+.obs-item{display:flex;gap:.55rem;margin-bottom:.55rem;font-size:.82rem;color:var(--ink2);line-height:1.5}
+.obs-item:last-child{margin-bottom:0}
+.obs-dot{width:5px;height:5px;border-radius:50%;background:var(--acc);flex-shrink:0;margin-top:.42rem}
+.obs-dot.g{background:var(--grn)}
+.concept-box{background:var(--acc-l);border-left:3px solid var(--acc);border-radius:0 var(--r) var(--r) 0;padding:.8rem 1rem;font-size:.82rem;color:var(--ink);line-height:1.6}
+.concept-box strong{display:block;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:.3rem}
+.predict-box{background:var(--amb-l);border:1px solid #fde68a;border-radius:var(--r);padding:.8rem 1rem}
+.predict-label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amb);margin-bottom:.35rem}
+.predict-box p{font-size:.82rem;color:var(--ink2);line-height:1.5}
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:.5rem}
+.rdout{background:var(--surface2);border-radius:var(--r);padding:.55rem .75rem;text-align:center}
+.rdout-lbl{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15rem}
+.rdout-val{font-family:var(--mono);font-size:.95rem;font-weight:500;color:var(--acc)}
+
+.exp-dots{display:flex;gap:5px;justify-content:center;padding:.75rem 0 .25rem}
+.exp-dot{width:7px;height:7px;border-radius:50%;background:var(--rule2);cursor:pointer;transition:all .15s}
+.exp-dot.active{background:var(--acc);transform:scale(1.2)}
+.exp-dot:hover{background:var(--acc-m)}
+
+@media(max-width:860px){
+  .exp-body{grid-template-columns:1fr}
+  .exp-right{border-top:1px solid var(--rule)}
+  .sidebar{display:none}
+  .lab-main{height:auto}
+}
+@media(max-width:560px){
+  .method-row{flex-direction:column}
+  .method-cell{border-right:none;border-bottom:1px solid var(--rule)}
+  .topics-grid{grid-template-columns:1fr}
+  .hero{padding:3rem 1.25rem 2rem}
+}
+
+/* ═══════════ AI TUTOR ═══════════ */
+#page-tutor{background:var(--bg)}
+.tutor-wrap{max-width:1020px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:240px 1fr;gap:18px;min-height:calc(100vh - 56px - 4rem)}
+.tutor-sidebar{display:flex;flex-direction:column;gap:8px}
+.tutor-side-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.2rem;padding:0 4px}
+.t-topic-btn{width:100%;padding:.65rem .875rem;border:1.5px solid var(--rule);border-radius:var(--r2);background:var(--surface);display:flex;align-items:center;gap:.625rem;cursor:pointer;transition:all .18s;text-align:left}
+.t-topic-btn:hover{border-color:var(--acc-m);background:var(--acc-l)}
+.t-topic-btn.sel{border-color:var(--acc);background:var(--acc-l)}
+.t-topic-btn .t-icon{font-size:1.05rem;flex-shrink:0}
+.t-topic-btn .t-name{font-size:.82rem;font-weight:500;color:var(--ink);flex:1}
+.t-topic-btn.sel .t-name{color:var(--acc)}
+.t-badge{font-size:.62rem;padding:2px 7px;border-radius:100px;font-weight:600;background:var(--surface2);color:var(--ink3)}
+.t-topic-btn.sel .t-badge{background:#dcfce7;color:#15803d}
+.tutor-info-box{margin-top:auto;padding:.875rem 1rem;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r2);font-size:.76rem;color:var(--ink2);line-height:1.6}
+.tutor-info-box b{display:block;margin-bottom:.35rem;color:var(--ink);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em}
+.chat-box{display:flex;flex-direction:column;background:var(--surface);border:1.5px solid var(--rule);border-radius:var(--r2);overflow:hidden;height:calc(100vh - 56px - 4rem)}
+.chat-head{padding:.875rem 1.25rem;border-bottom:1.5px solid var(--rule);display:flex;align-items:center;gap:.75rem;flex-shrink:0}
+.chat-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4361ee 0%,#0d9488 100%);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.chat-head-info h3{font-size:.875rem;font-weight:600;line-height:1.2}
+.chat-head-info p{font-size:.72rem;color:var(--ink3)}
+.chat-online{margin-left:auto;font-size:.72rem;color:var(--grn);font-weight:500;display:flex;align-items:center;gap:4px}
+.chat-online::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--grn)}
+.chat-msgs{flex:1;overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:10px}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
+.msg{display:flex;gap:8px;max-width:86%}
+.msg.ai{align-self:flex-start}
+.msg.usr{align-self:flex-end;flex-direction:row-reverse}
+.m-av{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.msg.ai .m-av{background:linear-gradient(135deg,#4361ee,#0d9488)}
+.msg.usr .m-av{background:var(--surface2);border:1px solid var(--rule)}
+.m-bub{padding:8px 12px;border-radius:13px;font-size:.83rem;line-height:1.6}
+.msg.ai .m-bub{background:var(--surface2);border:1px solid var(--rule);border-top-left-radius:3px;color:var(--ink)}
+.msg.usr .m-bub{background:var(--acc);color:#fff;border-bottom-right-radius:3px}
+.typing{display:flex;gap:4px;padding:9px 12px;background:var(--surface2);border:1px solid var(--rule);border-radius:13px;border-top-left-radius:3px}
+.td{width:5px;height:5px;border-radius:50%;background:var(--ink3);animation:td 1.1s ease-in-out infinite}
+.td:nth-child(2){animation-delay:.17s}.td:nth-child(3){animation-delay:.34s}
+@keyframes td{0%,80%,100%{transform:scale(.65);opacity:.35}40%{transform:scale(1);opacity:1}}
+.chat-inp-row{padding:.75rem 1rem;border-top:1.5px solid var(--rule);display:flex;gap:7px;flex-shrink:0}
+.chat-inp{flex:1;background:var(--surface2);border:1.5px solid var(--rule);border-radius:9px;padding:8px 12px;font-family:var(--sans);font-size:.83rem;color:var(--ink);resize:none;outline:none;transition:border-color .18s;line-height:1.5;max-height:110px}
+.chat-inp:focus{border-color:var(--acc)}
+.chat-inp::placeholder{color:var(--ink3)}
+.send-btn{width:36px;height:36px;border-radius:9px;border:none;background:var(--acc);color:#fff;font-size:.95rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;align-self:flex-end}
+.send-btn:hover{background:#3451db}
+.send-btn:disabled{opacity:.3;pointer-events:none}
+.chat-fin{padding:.65rem 1rem;border-top:1.5px solid var(--rule);background:var(--acc-l);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;display:none}
+.chat-fin p{font-size:.78rem;color:var(--acc);font-weight:500}
+.btn-analyze{padding:6px 16px;border-radius:8px;background:var(--acc);color:#fff;border:none;cursor:pointer;font-size:.8rem;font-weight:600;font-family:var(--sans)}
+.btn-analyze:hover{background:#3451db}
+/* ═══════════ ANALYSIS ═══════════ */
+#page-analysis{background:var(--bg)}
+.an-wrap{max-width:1000px;margin:0 auto;padding:2rem}
+.an-hero{margin-bottom:1.75rem}
+.an-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:.4rem}
+.an-hero h2{font-family:var(--serif);font-size:2rem;letter-spacing:-.04em;margin-bottom:.3rem}
+.an-hero p{color:var(--ink2);font-size:.87rem}
+.an-grid{display:grid;grid-template-columns:1fr 310px;gap:16px}
+.an-col{display:flex;flex-direction:column;gap:14px}
+.an-card{background:var(--surface);border:1.5px solid var(--rule);border-radius:var(--r2);padding:1.125rem}
+.an-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.875rem}
+#radar-cv{width:100%;display:block}
+.dim-rows{display:flex;flex-direction:column;gap:8px;margin-top:.875rem}
+.dim-r{display:flex;align-items:center;gap:9px}
+.dim-n{font-size:.75rem;color:var(--ink2);flex:0 0 180px;line-height:1.3}
+.dim-bg{flex:1;height:4px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.dim-fill{height:100%;border-radius:4px;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+.dim-pct{font-family:var(--mono);font-size:.72rem;color:var(--acc);min-width:30px;text-align:right}
+.bloom-wrap{display:flex;flex-direction:column;gap:5px;margin-top:.75rem}
+.bloom-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);font-size:.78rem;transition:all .18s;color:var(--ink3)}
+.bloom-row.b-done{color:#15803d}
+.bloom-row.b-now{background:var(--acc-l);color:var(--acc);font-weight:600;border:1px solid var(--acc-m)}
+.bloom-row::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.bloom-big{font-size:1.25rem;font-weight:700;letter-spacing:-.03em;font-family:var(--serif)}
+.bloom-sub{font-size:.75rem;color:var(--ink3);margin-top:2px;margin-bottom:.5rem}
+.insight-item{display:flex;gap:8px;margin-bottom:.7rem;font-size:.81rem;line-height:1.55;color:var(--ink2)}
+.i-ico{flex-shrink:0;font-size:.85rem;margin-top:.1rem}
+.insight-item:last-child{margin-bottom:0}
+.res-item{display:flex;align-items:center;gap:9px;padding:.6rem 0;border-bottom:1px solid var(--rule);cursor:pointer;transition:opacity .15s}
+.res-item:last-child{border-bottom:none}
+.res-item:hover{opacity:.65}
+.res-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0}
+.res-ico.pu{background:var(--acc-l)}.res-ico.te{background:var(--grn-l)}.res-ico.am{background:var(--amb-l)}
+.res-meta h4{font-size:.78rem;font-weight:500;margin-bottom:1px}
+.res-meta p{font-size:.68rem;color:var(--ink3)}
+.next-btn{width:100%;padding:.6rem .9rem;border:1.5px solid var(--rule);border-radius:var(--r);background:var(--surface2);display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.8rem;font-weight:500;color:var(--ink);transition:all .15s;text-align:left;margin-bottom:6px;font-family:var(--sans)}
+.next-btn:hover{background:var(--acc-l);border-color:var(--acc-m);color:var(--acc)}
+.next-btn .nb-arr{margin-left:auto;font-size:.72rem;color:var(--acc)}
+/* ═══════════ PLANNER ═══════════ */
+#page-planner{background:var(--bg)}
+.pl-wrap{max-width:860px;margin:0 auto;padding:2rem}
+.pl-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:.4rem}
+.pl-hero h2{font-family:var(--serif);font-size:2rem;letter-spacing:-.04em;margin-bottom:.3rem}
+.pl-hero p{color:var(--ink2);font-size:.87rem;margin-bottom:1.4rem}
+.pl-setup{background:var(--surface);border:1.5px solid var(--rule);border-radius:var(--r2);padding:1.4rem;margin-bottom:1.4rem}
+.pl-setup h3{font-size:.95rem;font-weight:600;margin-bottom:1.1rem;letter-spacing:-.02em}
+.pl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:.75rem;color:var(--ink2);font-weight:500}
+.fg input,.fg select{background:var(--surface2);border:1.5px solid var(--rule);border-radius:9px;padding:8px 11px;font-family:var(--sans);font-size:.83rem;color:var(--ink);outline:none;transition:border-color .18s}
+.fg input:focus,.fg select:focus{border-color:var(--acc)}
+.weak-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px}
+.w-tag{padding:4px 11px;border-radius:100px;font-size:.75rem;cursor:pointer;border:1.5px solid var(--rule);color:var(--ink2);transition:all .18s;background:var(--surface);font-family:var(--sans)}
+.w-tag.on{background:var(--red-l);border-color:#fca5a5;color:var(--red)}
+.btn-gen{margin-top:1.1rem;padding:9px 22px;border-radius:9px;background:var(--acc);color:#fff;border:none;cursor:pointer;font-family:var(--sans);font-size:.875rem;font-weight:600;transition:all .18s}
+.btn-gen:hover{background:#3451db;transform:translateY(-1px)}
+.btn-gen:disabled{opacity:.4;pointer-events:none;transform:none}
+.pl-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.pl-stat{background:var(--surface);border:1.5px solid var(--rule);border-radius:var(--r);padding:.75rem .875rem}
+.ps-lbl{font-size:.66rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.2rem}
+.ps-val{font-size:1.45rem;font-weight:700;letter-spacing:-.04em}
+.timeline{display:flex;flex-direction:column;gap:9px}
+.day-card{background:var(--surface);border:1.5px solid var(--rule);border-radius:var(--r2);display:flex;overflow:hidden;transition:border-color .18s}
+.day-card:hover{border-color:var(--acc-m)}
+.day-card.urg{border-color:#fca5a5}
+.day-badge{padding:1rem 1.1rem;background:var(--surface2);border-right:1.5px solid var(--rule);min-width:64px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex-shrink:0}
+.day-card.urg .day-badge{background:var(--red-l);border-right-color:#fca5a5}
+.d-num{font-size:1.3rem;font-weight:700;letter-spacing:-.05em;line-height:1;font-family:var(--mono)}
+.d-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3)}
+.day-body{padding:.875rem 1.1rem;flex:1}
+.day-body h4{font-size:.87rem;font-weight:600;margin-bottom:.45rem;letter-spacing:-.01em}
+.day-tasks{display:flex;flex-wrap:wrap;gap:5px}
+.d-task{padding:3px 9px;border-radius:100px;font-size:.7rem;font-weight:500;display:flex;align-items:center;gap:4px;border:1px solid}
+.d-task::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}
+.d-task.lab{border-color:rgba(13,148,136,.3);color:var(--grn);background:var(--grn-l)}
+.d-task.tutor{border-color:rgba(67,97,238,.3);color:var(--acc);background:var(--acc-l)}
+.d-task.review{border-color:rgba(217,119,6,.3);color:var(--amb);background:var(--amb-l)}
+.pl-out{display:none}
+.pl-out.vis{display:block}
+@media(max-width:720px){
+  .tutor-wrap{grid-template-columns:1fr}.tutor-sidebar{display:none}
+  .an-grid{grid-template-columns:1fr}
+  .pl-grid{grid-template-columns:1fr}
+  .pl-stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand" onclick="showPage('home')">
+    <div class="nav-mark">F</div>FeynPhys AI
+  </div>
+  <button class="nav-tab active" id="ntab-home" onclick="showPage('home')">Home</button>
+  <button class="nav-tab" id="ntab-labs" onclick="showPage('labs')">Labs</button>
+  <button class="nav-tab" id="ntab-tutor" onclick="showPage('tutor')">AI Tutor</button>
+  <button class="nav-tab" id="ntab-analysis" onclick="showPage('analysis')">Analysis</button>
+  <button class="nav-tab" id="ntab-planner" onclick="showPage('planner')">Planner</button>
+</nav>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-eye">The Feynman Method · Interactive Physics</div>
+    <h1>Don't memorise Physics.<br><em>Understand</em> it.</h1>
+    <p class="hero-sub">Run real experiments. Make a prediction first. See what happens. Then explain it in plain language. That loop builds real intuition.</p>
+    <div class="hero-ctas">
+      <button class="btn-lg primary" onclick="showPage('labs')">Open the Labs →</button>
+      <button class="btn-lg ghost" onclick="scrollToTopics()">Browse topics</button>
+    </div>
+  </div>
+  <div class="method-row">
+    <div class="method-cell"><div class="ic">👁️</div><h3>Observe</h3><p>Watch the phenomenon before reading about it</p></div>
+    <div class="method-cell"><div class="ic">🎯</div><h3>Predict</h3><p>Commit to an answer before testing</p></div>
+    <div class="method-cell"><div class="ic">🧪</div><h3>Experiment</h3><p>Change one variable, watch the effect</p></div>
+    <div class="method-cell"><div class="ic">💬</div><h3>Explain</h3><p>Teach it back in your own words</p></div>
+  </div>
+  <div class="topics-home" id="home-topics-section">
+    <div class="sec-label">Six topics · 18 experiments</div>
+    <div class="topics-grid" id="home-topics-grid"></div>
+  </div>
+</div>
+
+<!-- LABS -->
+<div id="page-labs" class="page">
+  <div class="sidebar" id="labs-sidebar"></div>
+  <div class="lab-main" id="lab-main"></div>
+</div>
+
+<!-- AI TUTOR -->
+<div id="page-tutor" class="page">
+  <div class="tutor-wrap">
+    <div class="tutor-sidebar">
+      <div class="tutor-side-label">Choose topic</div>
+      <div id="tutor-topics-list"></div>
+      <div class="tutor-info-box">
+        <b>How this works</b>
+        Explain the concept in plain language. Your AI tutor will probe your reasoning — it won't give you answers, it will reveal what you actually understand.
+      </div>
+    </div>
+    <div class="chat-box">
+      <div class="chat-head">
+        <div class="chat-av">🤖</div>
+        <div class="chat-head-info">
+          <h3>Feynman AI Tutor</h3>
+          <p id="chat-topic-label">Select a topic to begin</p>
+        </div>
+        <div class="chat-online" id="chat-online">Online</div>
+      </div>
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="msg ai">
+          <div class="m-av">🤖</div>
+          <div class="m-bub">Hello! I'm your Feynman Tutor. Choose a Physics topic on the left, then explain it to me in your own words — as if you're talking to a curious friend who has never studied Physics. Don't worry about being perfect. I'll help you discover what you truly understand and where the gaps are.</div>
+        </div>
+      </div>
+      <div class="chat-inp-row">
+        <textarea class="chat-inp" id="chat-inp" rows="1" placeholder="Type your explanation… Enter to send, Shift+Enter for new line" onkeydown="chatKey(event)" oninput="chatResize(this)"></textarea>
+        <button class="send-btn" id="chat-send" onclick="sendChat()" disabled title="Send">↑</button>
+      </div>
+      <div class="chat-fin" id="chat-fin">
+        <p>💡 Good conversation — ready for your Knowledge Gap Analysis?</p>
+        <button class="btn-analyze" onclick="goAnalysis()">View Analysis →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYSIS -->
+<div id="page-analysis" class="page">
+  <div class="an-wrap">
+    <div class="an-hero">
+      <div class="an-eyebrow">Knowledge Gap Analysis</div>
+      <h2 id="an-title">Waves — Understanding Map</h2>
+      <p id="an-sub">Based on your AI Tutor conversation · 6-dimension evaluation</p>
+    </div>
+    <div class="an-grid">
+      <div class="an-col">
+        <div class="an-card">
+          <div class="an-label">Understanding Radar</div>
+          <canvas id="radar-cv" height="250"></canvas>
+          <div class="dim-rows" id="dim-rows"></div>
+        </div>
+        <div class="an-card">
+          <div class="an-label">Diagnostic Insights</div>
+          <div id="an-insights"></div>
+        </div>
+      </div>
+      <div class="an-col">
+        <div class="an-card">
+          <div class="an-label">Bloom's Taxonomy Level</div>
+          <div class="bloom-big" id="bloom-name">Apply</div>
+          <div class="bloom-sub" id="bloom-sub">Level 3 of 6</div>
+          <div class="bloom-wrap" id="bloom-wrap"></div>
+        </div>
+        <div class="an-card">
+          <div class="an-label">Personalised Resources</div>
+          <div id="an-resources"></div>
+        </div>
+        <div class="an-card">
+          <div class="an-label">Suggested Next Topics</div>
+          <div id="an-next"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLANNER -->
+<div id="page-planner" class="page">
+  <div class="pl-wrap">
+    <div class="pl-hero">
+      <div class="pl-eyebrow">Personalised Study Planner</div>
+      <h2>Build your exam plan</h2>
+      <p>The AI generates a day-by-day schedule based on your weak topics, exam date, and available time.</p>
+    </div>
+    <div class="pl-setup">
+      <h3>Tell us about your situation</h3>
+      <div class="pl-grid">
+        <div class="fg"><label>Exam date</label><input type="date" id="exam-date"></div>
+        <div class="fg"><label>Study hours per day</label>
+          <select id="study-hrs">
+            <option value="1">1 hour / day</option>
+            <option value="2" selected>2 hours / day</option>
+            <option value="3">3 hours / day</option>
+            <option value="4">4+ hours / day</option>
+          </select>
+        </div>
+        <div class="fg" style="grid-column:span 2">
+          <label>Weak topics</label>
+          <div class="weak-tags">
+            <span class="w-tag on" onclick="toggleWT(this)">Waves</span>
+            <span class="w-tag on" onclick="toggleWT(this)">Electricity</span>
+            <span class="w-tag" onclick="toggleWT(this)">Forces</span>
+            <span class="w-tag" onclick="toggleWT(this)">Motion</span>
+            <span class="w-tag" onclick="toggleWT(this)">Energy</span>
+            <span class="w-tag" onclick="toggleWT(this)">Momentum</span>
+          </div>
+        </div>
+        <div class="fg" style="grid-column:span 2"><label>Goal</label>
+          <select id="study-goal">
+            <option>Deep conceptual understanding (Feynman Method)</option>
+            <option>Exam preparation — timed practice</option>
+            <option>Fill specific knowledge gaps from Analysis</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-gen" id="btn-gen" onclick="genPlan()">Generate my study plan →</button>
+    </div>
+    <div class="pl-out" id="pl-out">
+      <div class="pl-stats">
+        <div class="pl-stat"><div class="ps-lbl">Days until exam</div><div class="ps-val" id="ps-days" style="color:var(--red)">—</div></div>
+        <div class="pl-stat"><div class="ps-lbl">Topics</div><div class="ps-val" id="ps-topics" style="color:var(--acc)">—</div></div>
+        <div class="pl-stat"><div class="ps-lbl">Mini Labs</div><div class="ps-val" id="ps-labs" style="color:var(--grn)">—</div></div>
+        <div class="pl-stat"><div class="ps-lbl">AI Tutor sessions</div><div class="ps-val" id="ps-tutor" style="color:var(--amb)">—</div></div>
+      </div>
+      <div class="timeline" id="plan-tl"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   DATA
+═══════════════════════════════════ */
+const TOPICS = [
+{
+  id:'waves', icon:'〰️', name:'Waves',
+  desc:'Discover how energy travels through matter — and why the matter itself stays put.',
+  exps:[
+    {
+      name:'Rope pulse: one flick, one wave',
+      short:'Flick a rope and watch what actually travels.',
+      predict:'If you flick the rope twice as hard, will the pulse move faster?',
+      observe:['The pulse travels rightward along the rope','The blue bead bobs up then back — it never drifts right','A harder flick makes a taller pulse, not a faster one'],
+      interact:['Click "Send pulse" to fire a single disturbance','Adjust pulse height with the slider','Toggle the tracked bead on/off'],
+      concept:'A wave carries energy, not matter. Each particle only oscillates in place. The disturbance is what travels.',
+      render:'renderRopePulse'
+    },
+    {
+      name:'Standing waves: finding resonance',
+      short:'Drive a rope until nodes freeze in place.',
+      predict:'If you double the driving frequency, how many loops will appear?',
+      observe:['Most frequencies produce a chaotic mess','At special frequencies the pattern locks — a standing wave','More loops appear as frequency increases'],
+      interact:['Sweep frequency with the slider','Click preset buttons to snap to exact resonances','Count the frozen nodes (red dots)'],
+      concept:'Standing waves form when reflections perfectly reinforce the incident wave. Only certain frequencies fit — those are the resonant frequencies.',
+      render:'renderStandingWave'
+    },
+    {
+      name:'Two-source interference: ripple tank',
+      short:'Two wave sources produce patterns of bright and dark bands.',
+      predict:'What happens to the pattern if you move the sources closer together?',
+      observe:['Bright bands where two crests meet (constructive)','Dark bands where a crest meets a trough (destructive)','The pattern rotates when you change source spacing'],
+      interact:['Click to reposition wave sources','Adjust frequency','Toggle one source off to see the difference'],
+      concept:'Interference is the superposition of two waves. Where they are in phase, they add; where they are out of phase by half a wavelength, they cancel.',
+      render:'renderRippleTank'
+    }
+  ]
+},
+{
+  id:'forces', icon:'⚡', name:'Forces',
+  desc:'Push, pull, balance — building Newton\'s intuition through direct interaction.',
+  exps:[
+    {
+      name:'Tug of war: balanced vs unbalanced',
+      short:'Change team sizes and watch the flag move.',
+      predict:'Team A pulls 300 N, Team B pulls 280 N. Which way does the flag move?',
+      observe:['Equal forces → flag stays still (equilibrium)','Any difference → flag accelerates toward the larger force','Bigger difference → faster acceleration'],
+      interact:['Add or remove players from each team with sliders','Watch the net force arrow','Observe flag acceleration'],
+      concept:'Net force — not any individual force — determines motion. Zero net force means no change in velocity, not no forces at all.',
+      render:'renderTugOfWar'
+    },
+    {
+      name:'Block on a ramp: gravity splits in two',
+      short:'Tilt a surface and watch gravity decompose into components.',
+      predict:'At what angle will the block start to slide? Make a guess first.',
+      observe:['As angle increases, the ramp component of gravity grows','The normal force shrinks as the ramp steepens','At the friction limit the block suddenly slides'],
+      interact:['Drag the angle slider','Toggle friction on/off','Toggle the vector decomposition view'],
+      concept:'Gravity always acts downward. A ramp\'s surface can only push perpendicular to itself — this forces gravity to split into a sliding component and a compressing component.',
+      render:'renderIncline'
+    },
+    {
+      name:'Hooke\'s Law: hanging masses from a spring',
+      short:'Add masses one by one and measure spring extension.',
+      predict:'Three masses stretch the spring 6 cm. How far will five masses stretch it?',
+      observe:['Each mass extends the spring by the same extra amount','Extension is proportional to force — the graph is a straight line','Beyond the elastic limit, the spring does not recover'],
+      interact:['Add or remove 100 g masses','Read spring extension and scale','Go past the elastic limit to see permanent deformation'],
+      concept:'Within its elastic limit, spring extension is directly proportional to applied force. This is Hooke\'s Law. Beyond the limit, the material deforms permanently.',
+      render:'renderSpringScale'
+    }
+  ]
+},
+{
+  id:'motion', icon:'🏃', name:'Motion',
+  desc:'Position, velocity, acceleration — reading the language of change.',
+  exps:[
+    {
+      name:'Dropping two balls: does mass change fall speed?',
+      short:'Drop a heavy and a light ball together and see which lands first.',
+      predict:'A 5 kg ball and a 0.1 kg ball are dropped from the same height. Which lands first?',
+      observe:['Without air: both hit at exactly the same moment, every time','With air: the lighter ball lags behind','Air resistance — not gravity — is why objects seem to fall differently'],
+      interact:['Click "Drop both" to release simultaneously','Toggle air resistance on/off','Try different mass combinations'],
+      concept:'Gravity accelerates all objects identically (g ≈ 9.8 m/s²) regardless of mass. Air resistance breaks this symmetry — that\'s the only reason objects fall differently in real life.',
+      render:'renderFreeFall'
+    },
+    {
+      name:'Pendulum: timing simple harmonic motion',
+      short:'Change length and release angle — discover what controls the period.',
+      predict:'If you double the pendulum length, does the period double, halve, or something else?',
+      observe:['Speed is maximum at the bottom, zero at the extremes','Period barely changes for small release angles','Longer pendulum → slower period, regardless of mass'],
+      interact:['Adjust pendulum length','Change release angle','Toggle energy bars (KE/PE)'],
+      concept:'Period depends on length and gravity, not on mass or angle (for small angles). The restoring force at every point is proportional to displacement — that\'s what makes motion harmonic.',
+      render:'renderPendulum'
+    },
+    {
+      name:'Circular motion: where does the force point?',
+      short:'Spin a ball on a string — cut the string and watch which way it flies.',
+      predict:'When the string breaks, does the ball fly outward, inward, or sideways?',
+      observe:['The velocity arrow is always tangential — sideways to the circle','The force arrow always points inward toward the centre','When the string cuts, the ball flies off tangentially — not outward'],
+      interact:['Adjust spin speed','Click "Cut string" at any moment','Observe the free-flight path'],
+      concept:'Circular motion requires a centripetal force directed inward. Without it, Newton\'s First Law takes over and the object moves in a straight line — tangent to the circle at the point of release.',
+      render:'renderCircular'
+    }
+  ]
+},
+{
+  id:'energy', icon:'🔋', name:'Energy',
+  desc:'Follow energy as it transforms — and confirm it never disappears.',
+  exps:[
+    {
+      name:'Roller coaster: PE and KE trade places',
+      short:'Watch energy bars swap as a car rides the track.',
+      predict:'The car starts at 10 m. Will it make it over a hill at 9 m? At 10 m? At 11 m?',
+      observe:['At the top: maximum PE, minimum KE','At the bottom: maximum KE, minimum PE','Total bar height stays constant without friction','With friction the total gradually shrinks'],
+      interact:['Drag hills to different heights','Add friction and watch total energy drain','Release from different starting heights'],
+      concept:'Mechanical energy is conserved when no friction acts. Height stores energy as PE; speed stores it as KE. They trade continuously but their sum is fixed.',
+      render:'renderRollerCoaster'
+    },
+    {
+      name:'Bouncing ball: where does energy go?',
+      short:'Drop three different balls and compare how high they bounce.',
+      predict:'After 3 bounces, where has the energy from the original drop gone?',
+      observe:['Rubber bounces high — most KE recovered','Steel: moderate','Clay barely bounces — most energy becomes heat and deformation','Each bounce loses some energy — but none is destroyed'],
+      interact:['Choose ball material','Adjust drop height','Count bounces to rest'],
+      concept:'At impact, kinetic energy converts to heat, sound, and deformation. "Elasticity" measures how much KE survives. Energy is conserved — it just changes form.',
+      render:'renderBouncingBall'
+    },
+    {
+      name:'Spring launcher: quadratic energy storage',
+      short:'Compress a spring and predict how high the ball flies.',
+      predict:'2 cm compression sends the ball 20 cm high. How high does 4 cm compression send it?',
+      observe:['Doubling compression sends the ball four times as high','This is because spring PE = ½kx² — energy scales as the square','The launch speed also doubles when compression doubles'],
+      interact:['Compress the spring different amounts','Release and track peak height','Compare results to predictions'],
+      concept:'Spring potential energy is proportional to the square of compression. Doubling the compression stores four times the energy — which means four times the height, not two.',
+      render:'renderSpringLaunch'
+    }
+  ]
+},
+{
+  id:'momentum', icon:'💥', name:'Momentum',
+  desc:'Collisions, impulse, recoil — understanding what really happens at impact.',
+  exps:[
+    {
+      name:'Newton\'s cradle: momentum passed perfectly',
+      short:'Pull back one ball, release — watch momentum teleport through the chain.',
+      predict:'If you pull back two balls, how many will fly out the other side?',
+      observe:['Pull 1 → exactly 1 flies out','Pull 2 → exactly 2 fly out','You cannot make 2 balls exit slowly when 1 enters fast — both laws forbid it'],
+      interact:['Choose 1, 2, or 3 balls to pull back','Watch the pattern','Try pulling from both ends simultaneously'],
+      concept:'In elastic collisions, both momentum AND kinetic energy are conserved. Newton\'s cradle enforces both simultaneously — only one outcome satisfies both laws at once.',
+      render:'renderCradle'
+    },
+    {
+      name:'Clay vs spring collision: momentum always, KE maybe',
+      short:'Two carts collide — one with clay, one with a spring bumper.',
+      predict:'Two 1 kg carts: one moving at 3 m/s hits one at rest and they stick. What is their combined speed?',
+      observe:['Clay: carts stick — momentum conserved, KE is not','Spring: carts bounce — both momentum and KE are conserved','Momentum total is identical before and after in both cases'],
+      interact:['Switch between clay and spring bumper','Set cart mass and speed','Read momentum readouts before and after'],
+      concept:'Momentum is always conserved in a closed system. Kinetic energy is only conserved in elastic collisions — in inelastic ones, some KE becomes heat, sound, and deformation.',
+      render:'renderInelastic'
+    },
+    {
+      name:'Explosion: equal and opposite recoil',
+      short:'Two carts push apart from rest — heavier cart moves slower.',
+      predict:'Cart A is twice as heavy as Cart B. After the spring releases, how do their speeds compare?',
+      observe:['Both carts move — one left, one right','Heavier cart moves more slowly','Total momentum remains zero — they started at rest','The magnitudes of momenta are equal and opposite'],
+      interact:['Set mass of each cart independently','Release the spring','Watch momentum readouts'],
+      concept:'Total momentum before was zero; it must be zero after. Each cart gains equal and opposite momentum. This is why rockets work and guns recoil.',
+      render:'renderExplosion'
+    }
+  ]
+},
+{
+  id:'electricity', icon:'⚡', name:'Electricity',
+  desc:'Build circuits, feel resistance, and see current as a flow you can control.',
+  exps:[
+    {
+      name:'Build a circuit: battery, wire, bulb',
+      short:'Connect components to make the bulb light — and find out why it needs a loop.',
+      predict:'If you cut the wire anywhere in the loop, does the bulb stay on?',
+      observe:['Open circuit: bulb is dark — no complete path','Close the loop: bulb glows — current flows in a circle','Breaking the wire anywhere kills the bulb'],
+      interact:['Click "Close switch" to complete the circuit','Open and close the switch repeatedly','Watch current-flow dots travel around the loop'],
+      concept:'Current flows only in a complete, closed loop. Every component must be connected in an unbroken path. Break it anywhere and current stops everywhere.',
+      render:'renderSimpleCircuit'
+    },
+    {
+      name:'Series vs parallel: same bulbs, different brightness',
+      short:'Wire two bulbs in series then parallel — the difference is dramatic.',
+      predict:'You have three identical bulbs. When are they brightest — all in series or all in parallel?',
+      observe:['Series: both dim; remove one and the other goes out','Parallel: both bright; remove one and the other stays on','Parallel gives each bulb full battery voltage','Series splits voltage between bulbs'],
+      interact:['Toggle between series and parallel wiring','Remove one bulb in each arrangement','Read brightness level indicators'],
+      concept:'Series components share voltage and have the same current. Parallel branches each receive full voltage. Household wiring is parallel — so one lamp does not affect others.',
+      render:'renderSeriesParallel'
+    },
+    {
+      name:'Ohm\'s Law: voltage, current, resistance',
+      short:'Adjust voltage and resistance — watch current respond instantly.',
+      predict:'At V = 6V and R = 3Ω, what is the current? Now double R — what happens?',
+      observe:['Double voltage (R fixed): current doubles','Double resistance (V fixed): current halves','V ÷ I always equals R — a constant for ohmic materials','Plotting V vs I gives a perfect straight line'],
+      interact:['Sweep voltage with the slider','Adjust resistance','Watch the V-I graph build point by point'],
+      concept:'Ohm\'s Law (V = IR) describes ohmic materials — those where resistance stays constant. The linear V-I graph is the signature of ohmic behaviour.',
+      render:'renderOhmsLaw'
+    }
+  ]
+}
+];
+
+/* ═══════════════════════════════════
+   STATE & ROUTING
+═══════════════════════════════════ */
+let curTopic = 0, curExp = 0;
+let anims = {};
+
+function cancelAnims(){ Object.values(anims).forEach(id=>cancelAnimationFrame(id)); anims={}; }
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const pg=document.getElementById('page-'+id); if(pg) pg.classList.add('active');
+  const tb=document.getElementById('ntab-'+id); if(tb) tb.classList.add('active');
+  if(id==='labs'){ buildSidebar(); renderExp(); }
+  if(id==='tutor'){ buildTutorList(); }
+  if(id==='analysis'){ setTimeout(renderAnalysis,60); }
+  if(id==='planner'){
+    const d=new Date(); d.setDate(d.getDate()+10);
+    const el=document.getElementById('exam-date'); if(el) el.valueAsDate=d;
+  }
+  window.scrollTo(0,0);
+}
+function scrollToTopics(){ document.getElementById('home-topics-section').scrollIntoView({behavior:'smooth'}); }
+function openTopic(ti){ curTopic=ti; curExp=0; showPage('labs'); }
+
+/* ═══════════════════════════════════
+   HOME BUILD
+═══════════════════════════════════ */
+function buildHome(){
+  const g=document.getElementById('home-topics-grid');
+  g.innerHTML=TOPICS.map((t,ti)=>`
+    <div class="topic-card" onclick="openTopic(${ti})">
+      <div class="tc-icon">${t.icon}</div>
+      <div class="tc-name">${t.name}</div>
+      <div class="tc-cnt">${t.exps.length} experiments</div>
+      <div class="tc-desc">${t.desc}</div>
+      <div class="tc-arrow">Explore labs →</div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════ */
+function buildSidebar(){
+  const sb=document.getElementById('labs-sidebar');
+  sb.innerHTML='<div class="sb-section">Topics & Labs</div>'+
+    TOPICS.map((t,ti)=>{
+      const active=ti===curTopic;
+      return `<div>
+        <button class="sb-topic-btn ${active?'active':''}" onclick="selectTopic(${ti})">
+          <span class="stb-icon">${t.icon}</span>
+          <span class="stb-name">${t.name}</span>
+          <span class="stb-cnt">${t.exps.length}</span>
+        </button>
+        <div class="sb-labs" style="${active?'':'display:none'}">
+          ${t.exps.map((e,ei)=>`
+            <button class="sb-lab ${active&&ei===curExp?'active':''}" onclick="selectExp(${ti},${ei})">
+              <span class="sln">${String(ei+1).padStart(2,'0')}</span>
+              ${e.name.split(':')[0]}
+            </button>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function selectTopic(ti){ curTopic=ti; curExp=0; buildSidebar(); renderExp(); }
+function selectExp(ti,ei){ curTopic=ti; curExp=ei; buildSidebar(); renderExp(); }
+
+/* ═══════════════════════════════════
+   EXP RENDERER
+═══════════════════════════════════ */
+function renderExp(){
+  cancelAnims();
+  const topic=TOPICS[curTopic], exp=topic.exps[curExp], n=topic.exps.length;
+  const main=document.getElementById('lab-main');
+  main.scrollTop=0;
+  main.innerHTML=`
+    <div class="lab-topbar">
+      <div class="lab-topbar-txt">
+        <div class="lab-eye">${topic.icon} ${topic.name}</div>
+        <h2>${exp.name}</h2>
+        <div class="lab-meta">Lab ${curExp+1} of ${n} · ${exp.short}</div>
+      </div>
+      <div class="nav-arrows">
+        <button class="arr-btn" onclick="prevExp()" ${curExp===0?'disabled':''}>←</button>
+        <button class="arr-btn" onclick="nextExp()" ${curExp===n-1?'disabled':''}>→</button>
+      </div>
+    </div>
+    <div class="exp-body">
+      <div class="exp-left">
+        <div class="sim-wrap">
+          <canvas class="sim-canvas" id="sim-cv"></canvas>
+          <div class="sim-hint" id="sim-hint">Interact with the simulation</div>
+        </div>
+        <div id="ctrl-area"></div>
+      </div>
+      <div class="exp-right">
+        <div class="predict-box">
+          <div class="predict-label">🎯 Predict first</div>
+          <p>${exp.predict}</p>
+        </div>
+        <div class="info-card">
+          <div class="info-title">What to observe</div>
+          ${exp.observe.map(o=>`<div class="obs-item"><div class="obs-dot"></div><div>${o}</div></div>`).join('')}
+        </div>
+        <div class="info-card">
+          <div class="info-title">What you can change</div>
+          ${exp.interact.map(i=>`<div class="obs-item"><div class="obs-dot g"></div><div>${i}</div></div>`).join('')}
+        </div>
+        <div class="concept-box"><strong>Key concept</strong>${exp.concept}</div>
+        <div class="exp-dots">
+          ${topic.exps.map((_,i)=>`<div class="exp-dot ${i===curExp?'active':''}" onclick="selectExp(${curTopic},${i})"></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  window[exp.render] && window[exp.render]();
+}
+
+function prevExp(){ if(curExp>0){curExp--;buildSidebar();renderExp();} }
+function nextExp(){ if(curExp<TOPICS[curTopic].exps.length-1){curExp++;buildSidebar();renderExp();} }
+
+function cv(){ return document.getElementById('sim-cv'); }
+function hint(t){ const h=document.getElementById('sim-hint'); if(h) h.textContent=t; }
+function ctrlArea(){ return document.getElementById('ctrl-area'); }
+function addCtrl(html){ const a=ctrlArea(); if(a) a.innerHTML=html; }
+
+/* ═══════════════════════════════════════════════════════
+   SIMULATIONS — WAVES
+═══════════════════════════════════════════════════════ */
+
+/* WAVES 1 — Rope Pulse */
+window.renderRopePulse = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  let pulseX=-999, pulseH=40, t=0, beadOn=true;
+  window._ph=40;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Controls</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Pulse height</span>
+      <input type="range" min="10" max="75" value="40" oninput="window._ph=+this.value;this.nextElementSibling.textContent=this.value">
+      <span class="ctrl-val">40</span>
+    </div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="window._firePulse()">Send pulse</button>
+      <button class="ctrl-btn" id="bead-btn" onclick="window._beadToggle()">Bead: ON</button>
+    </div>
+  </div>`);
+
+  window._firePulse=()=>{ pulseX=0; pulseH=window._ph; };
+  window._beadToggle=()=>{ beadOn=!beadOn; document.getElementById('bead-btn').textContent='Bead: '+(beadOn?'ON':'OFF'); };
+
+  const BEAD=Math.floor(W*0.45/16);
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    /* dashed centre line */
+    ctx.setLineDash([6,5]); ctx.strokeStyle='#e0e0ec'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W2,H/2); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* fixed-end blocks */
+    ctx.fillStyle='#c0c0d4'; ctx.fillRect(0,H/2-22,7,44); ctx.fillRect(W2-7,H/2-22,7,44);
+
+    const N=Math.floor(W2/16), sigma=32;
+    let pts=[];
+    for(let i=0;i<=N;i++){
+      const x=7+i*(W2-14)/N;
+      const dx=x-pulseX;
+      const y=H/2-pulseH*Math.exp(-dx*dx/(2*sigma*sigma));
+      pts.push({x,y});
+    }
+
+    /* rope segments */
+    ctx.strokeStyle='#7c7caa'; ctx.lineWidth=3.5; ctx.lineCap='round';
+    ctx.beginPath();
+    pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+
+    /* particles */
+    pts.forEach((p,i)=>{
+      if(beadOn && i===BEAD){
+        ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2);
+        ctx.fillStyle='#4361ee'; ctx.fill();
+        ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+        if(Math.abs(p.y-H/2)>4){
+          ctx.setLineDash([3,3]); ctx.strokeStyle='rgba(67,97,238,.4)'; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.moveTo(p.x,H/2); ctx.lineTo(p.x,p.y); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      } else {
+        ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2);
+        ctx.fillStyle='#a0a0c4'; ctx.fill();
+      }
+    });
+
+    /* direction label */
+    if(pulseX>0 && pulseX<W2){
+      ctx.fillStyle='rgba(67,97,238,.7)'; ctx.font='11px DM Mono,monospace';
+      ctx.fillText('energy →', Math.min(pulseX+14, W2-110), H/2-pulseH-18);
+    }
+
+    pulseX+=3; if(pulseX>W2+80) pulseX=-999;
+    t++; anims.rp=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Click "Send pulse" — watch the blue bead');
+};
+
+/* WAVES 2 — Standing Wave */
+window.renderStandingWave = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  let t=0; window._swF=2;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Driving frequency</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Frequency</span>
+      <input type="range" min="0.5" max="6" step="0.05" value="2" oninput="window._swF=+this.value;this.nextElementSibling.textContent=(+this.value).toFixed(2)">
+      <span class="ctrl-val">2.00</span>
+    </div>
+    <div class="ctrl-btns">
+      ${[1,2,3,4,5].map(n=>`<button class="ctrl-btn" onclick="window._swF=${n};document.querySelector('#ctrl-area input[type=range]').value=${n};document.querySelector('#ctrl-area .ctrl-val').textContent='${n}.00'">${n} loop${n>1?'s':''}</button>`).join('')}
+    </div>
+  </div>`);
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const cy=H/2, f=window._swF, nRound=Math.round(f), nearRes=Math.abs(f-nRound)<0.12;
+    const amp=nearRes?62:8+Math.sin(t*.25)*5;
+    const col=nearRes?'#4361ee':'#c0c0d4';
+
+    ctx.beginPath();
+    for(let x=0;x<W2;x++){
+      const y=cy-amp*Math.sin(nRound*Math.PI*x/W2)*Math.cos(t*.07);
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=col; ctx.lineWidth=nearRes?3:2; ctx.stroke();
+
+    if(nearRes){
+      for(let i=0;i<=nRound;i++){
+        ctx.beginPath(); ctx.arc(i*W2/nRound,cy,5,0,Math.PI*2);
+        ctx.fillStyle='#dc2626'; ctx.fill();
+      }
+      ctx.fillStyle='#4361ee'; ctx.font='bold 12px DM Sans,sans-serif';
+      ctx.fillText(`Resonance — ${nRound} loop${nRound>1?'s':''}`, 12, 26);
+      ctx.fillStyle='#dc2626'; ctx.font='11px DM Mono,monospace';
+      ctx.fillText('● node (zero movement)', 12, 44);
+    } else {
+      ctx.fillStyle='#b0b0cc'; ctx.font='12px DM Sans,sans-serif';
+      ctx.fillText('Chaotic — not a resonant frequency', 12, 26);
+    }
+
+    ctx.fillStyle='#c0c0d4'; ctx.fillRect(0,cy-36,5,72); ctx.fillRect(W2-5,cy-36,5,72);
+    t++; anims.sw=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Sweep slowly — listen for the wave to "lock in"');
+};
+
+/* WAVES 3 — Ripple Tank */
+window.renderRippleTank = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  let t=0; window._rtF=3; window._rtN=2;
+  let srcs=[{x:W*.35,y:H*.5},{x:W*.65,y:H*.5}];
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Controls</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Frequency</span>
+      <input type="range" min="1" max="8" value="3" oninput="window._rtF=+this.value;this.nextElementSibling.textContent=this.value">
+      <span class="ctrl-val">3</span>
+    </div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="window._rtN=1">1 source</button>
+      <button class="ctrl-btn" onclick="window._rtN=2">2 sources</button>
+    </div>
+  </div>`);
+
+  c.onclick=e=>{
+    const r=c.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    const W2=c.offsetWidth;
+    if(window._rtN===1) srcs=[{x:mx,y:my}];
+    else srcs=[{x:mx,y:my},{x:W2-mx,y:my}];
+  };
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    const img=ctx.createImageData(W2,H); const d=img.data;
+    const n=Math.min(window._rtN,srcs.length);
+    for(let y=0;y<H;y++) for(let x=0;x<W2;x++){
+      let amp=0;
+      for(let s=0;s<n;s++){
+        const dist=Math.sqrt((x-srcs[s].x)**2+(y-srcs[s].y)**2);
+        amp+=Math.sin(dist*.2-t*window._rtF*.1)*Math.exp(-dist*.003);
+      }
+      amp/=n;
+      const v=Math.floor((amp*.5+.5)*255);
+      const i=(y*W2+x)*4;
+      d[i]=40+v*.3; d[i+1]=60+v*.2; d[i+2]=180+v*.25; d[i+3]=255;
+    }
+    ctx.putImageData(img,0,0);
+    for(let s=0;s<n;s++){
+      ctx.beginPath(); ctx.arc(srcs[s].x,srcs[s].y,7,0,Math.PI*2);
+      ctx.fillStyle='#fff'; ctx.fill();
+      ctx.strokeStyle='#4361ee'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='#1a1a2e'; ctx.font='bold 10px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText('S'+(s+1),srcs[s].x,srcs[s].y+4);
+    }
+    ctx.textAlign='left';
+    if(n===2){
+      ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='11px DM Sans,sans-serif';
+      ctx.fillText('Bright = constructive · Dark = destructive',10,H-12);
+    }
+    t++; anims.rt=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Click anywhere to reposition sources');
+};
+
+/* ═══════════════════════════════════════════════════════
+   FORCES
+═══════════════════════════════════════════════════════ */
+
+/* FORCES 1 — Tug of War */
+window.renderTugOfWar = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  let t=0, flagX=W/2; window._twA=3; window._twB=3;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Team forces</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Team A (left)</span>
+      <input type="range" min="1" max="6" value="3" oninput="window._twA=+this.value;this.nextElementSibling.textContent=this.value+'00 N'">
+      <span class="ctrl-val">300 N</span>
+    </div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Team B (right)</span>
+      <input type="range" min="1" max="6" value="3" oninput="window._twB=+this.value;this.nextElementSibling.textContent=this.value+'00 N'">
+      <span class="ctrl-val">300 N</span>
+    </div>
+    <div class="readouts">
+      <div class="rdout"><div class="rdout-lbl">Net force</div><div class="rdout-val" id="tw-net">0 N</div></div>
+      <div class="rdout"><div class="rdout-lbl">State</div><div class="rdout-val" id="tw-st" style="font-size:.75rem">Balanced</div></div>
+    </div>
+  </div>`);
+
+  function drawPerson(px,py,col){
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.arc(px,py-28,8,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(px,py-20); ctx.lineTo(px,py); ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px,py-14); ctx.lineTo(px+9,py-6); ctx.moveTo(px,py-14); ctx.lineTo(px-9,py-6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px-5,py+16); ctx.moveTo(px,py); ctx.lineTo(px+5,py+16); ctx.stroke();
+  }
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+    const cy=H*.55, A=window._twA, B=window._twB, net=A-B;
+    flagX=Math.max(W2*.18,Math.min(W2*.82,flagX+net*.0025));
+
+    /* ground */
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(0,cy+20,W2,H-cy-20);
+    ctx.strokeStyle='#d0d0e0'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,cy+20); ctx.lineTo(W2,cy+20); ctx.stroke();
+
+    /* rope gradient */
+    const g=ctx.createLinearGradient(60,0,W2-60,0);
+    g.addColorStop(0,'#4361ee'); g.addColorStop(1,'#dc2626');
+    ctx.strokeStyle=g; ctx.lineWidth=6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(60,cy); ctx.lineTo(W2-60,cy); ctx.stroke();
+
+    /* flag */
+    ctx.fillStyle='#d97706'; ctx.fillRect(flagX-2,cy-48,4,48);
+    ctx.beginPath(); ctx.moveTo(flagX+2,cy-48); ctx.lineTo(flagX+24,cy-38); ctx.lineTo(flagX+2,cy-28); ctx.closePath();
+    ctx.fillStyle='#d97706'; ctx.fill();
+
+    /* teams */
+    for(let i=0;i<A;i++) drawPerson(52-i*20,cy,'#4361ee');
+    for(let i=0;i<B;i++) drawPerson(W2-52+i*20,cy,'#dc2626');
+
+    /* force arrows */
+    if(A>0){ ctx.strokeStyle='#4361ee'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(flagX,cy); ctx.lineTo(flagX-A*22-8,cy); ctx.stroke(); }
+    if(B>0){ ctx.strokeStyle='#dc2626'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(flagX,cy); ctx.lineTo(flagX+B*22+8,cy); ctx.stroke(); }
+
+    /* labels */
+    ctx.fillStyle='#4361ee'; ctx.font='bold 11px DM Sans,sans-serif';
+    ctx.fillText(`Team A: ${A*100} N`,10,22);
+    ctx.fillStyle='#dc2626'; ctx.textAlign='right';
+    ctx.fillText(`Team B: ${B*100} N`,W2-10,22);
+    ctx.textAlign='left';
+
+    const nd=(A-B)*100;
+    document.getElementById('tw-net').textContent=(nd>0?'+':'')+nd+' N';
+    document.getElementById('tw-st').textContent=nd===0?'⚖ Balanced':nd>0?'→ Right':'← Left';
+    t++; anims.tw=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Make one team stronger — watch the flag accelerate');
+};
+
+/* FORCES 2 — Incline */
+window.renderIncline = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  let blockY=0; window._incAng=20; window._incFric=true;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Ramp controls</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Angle</span>
+      <input type="range" min="0" max="70" value="20" oninput="window._incAng=+this.value;this.nextElementSibling.textContent=this.value+'°';window._incSlide=false;window._incBY=0">
+      <span class="ctrl-val">20°</span>
+    </div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn on" id="inc-fri" onclick="window._incFric=true;this.classList.add('on');document.getElementById('inc-nof').classList.remove('on')">Friction ON</button>
+      <button class="ctrl-btn" id="inc-nof" onclick="window._incFric=false;this.classList.remove('on');document.getElementById('inc-fri').classList.remove('on')">Friction OFF</button>
+    </div>
+    <div class="readouts">
+      <div class="rdout"><div class="rdout-lbl">Angle</div><div class="rdout-val" id="inc-ang">20°</div></div>
+      <div class="rdout"><div class="rdout-lbl">Status</div><div class="rdout-val" id="inc-st" style="font-size:.75rem">Static</div></div>
+    </div>
+  </div>`);
+  window._incBY=0; window._incSlide=false;
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const a=window._incAng*Math.PI/180;
+    const bx=70, by=H-55, RL=W2-120;
+    const tx=bx+RL*Math.cos(a), ty=by-RL*Math.sin(a);
+    const frLimit=Math.atan(0.38)*180/Math.PI;
+    const sliding=!window._incFric||(window._incAng>frLimit);
+
+    if(sliding) window._incBY=Math.min(window._incBY+0.015, 0.7);
+    else window._incBY=0;
+
+    /* ramp shape */
+    ctx.fillStyle='#f0f0f8';
+    ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(tx,ty); ctx.lineTo(bx,by); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=2; ctx.stroke();
+
+    /* block */
+    const t2=window._incBY;
+    const bpx=tx+(bx-tx)*(0.08+t2*0.88), bpy=ty+(by-ty)*(0.08+t2*0.88);
+
+    ctx.save(); ctx.translate(bpx,bpy); ctx.rotate(-a);
+    ctx.fillStyle='#4361ee'; ctx.fillRect(-18,-22,36,22);
+    ctx.strokeStyle='#3451db'; ctx.lineWidth=1.5; ctx.strokeRect(-18,-22,36,22);
+
+    /* vectors */
+    const sc=32;
+    /* weight component down-ramp */
+    ctx.strokeStyle='#dc2626'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(0,-11); ctx.lineTo(sc*Math.sin(a)*.8,-11+sc*Math.cos(a)*.8); ctx.stroke();
+    /* normal */
+    ctx.strokeStyle='#0d9488'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(0,-22); ctx.lineTo(0,-22-sc); ctx.stroke();
+    ctx.restore();
+
+    /* legend */
+    const L=[[`#dc2626`,'Weight (ramp component)'],[`#0d9488`,'Normal force']];
+    L.forEach(([col,lbl],i)=>{
+      ctx.fillStyle=col; ctx.fillRect(10,12+i*16,9,9);
+      ctx.fillStyle='#4a4a6a'; ctx.font='11px DM Sans,sans-serif'; ctx.fillText(lbl,23,20+i*16);
+    });
+
+    document.getElementById('inc-ang').textContent=window._incAng+'°';
+    document.getElementById('inc-st').textContent=sliding?'🟠 Sliding':'🟢 Static';
+    anims.inc=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Increase angle until block slides');
+};
+
+/* FORCES 3 — Spring Scale */
+window.renderSpringScale = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._ssM=3;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Masses (100 g each)</div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="window._ssM=Math.max(0,window._ssM-1)">Remove mass</button>
+      <button class="ctrl-btn" onclick="window._ssM=Math.min(9,window._ssM+1)">Add mass</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">Masses</div><div class="rdout-val" id="ss-m">3</div></div>
+      <div class="rdout"><div class="rdout-lbl">Extension</div><div class="rdout-val" id="ss-e">6 cm</div></div>
+      <div class="rdout"><div class="rdout-lbl">Force</div><div class="rdout-val" id="ss-f">2.94 N</div></div>
+      <div class="rdout"><div class="rdout-lbl">Hooke's?</div><div class="rdout-val" id="ss-h" style="font-size:.75rem">Linear ✓</div></div>
+    </div>
+  </div>`);
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const m=window._ssM;
+    const cx2=W2/2, fixY=24;
+    const natLen=80, extPerMass=m<8?2:3.5;
+    const ext=m*extPerMass;
+    const totLen=natLen+ext*7;
+    const springBot=fixY+10+totLen;
+
+    /* ceiling */
+    ctx.fillStyle='#c0c0d4'; ctx.fillRect(cx2-36,fixY,72,10);
+
+    /* spring coils */
+    const coils=14, coilH=totLen/coils;
+    ctx.strokeStyle=m>7?'#dc2626':'#4361ee'; ctx.lineWidth=2.5; ctx.lineCap='round';
+    ctx.beginPath();
+    for(let i=0;i<=coils*4;i++){
+      const py=fixY+10+i/4*coilH;
+      const px=cx2+(i%4===1?18:i%4===3?-18:0);
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+
+    /* masses */
+    for(let i=0;i<m;i++){
+      const my=springBot+i*22;
+      ctx.fillStyle='#4a4a6a'; ctx.fillRect(cx2-24,my,48,20);
+      ctx.fillStyle='#fff'; ctx.font='bold 9px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText('100g',cx2,my+13); ctx.textAlign='left';
+    }
+
+    /* extension ruler */
+    const rX=cx2+52;
+    ctx.strokeStyle='#e0e0ec'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(rX,fixY+10); ctx.lineTo(rX,springBot); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#9090b0'; ctx.font='10px DM Mono,monospace';
+    ctx.fillText(`${(ext*7/10).toFixed(1)} cm`,rX+5,(fixY+10+springBot)/2);
+
+    /* graph (right side mini) */
+    const gx=W2-100, gy=H-20, gh=H*.55;
+    ctx.strokeStyle='#e0e0ec'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(gx,gy-gh); ctx.lineTo(gx,gy); ctx.lineTo(gx+80,gy); ctx.stroke();
+    ctx.strokeStyle=m>7?'#dc2626':'#4361ee'; ctx.lineWidth=2;
+    ctx.beginPath();
+    for(let i=0;i<=Math.min(m,7);i++){
+      const px=gx+i*80/9, py=gy-i*gh/9;
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+    if(m>7){
+      ctx.beginPath();
+      for(let i=7;i<=m;i++){
+        const px=gx+i*80/9, py=gy-(7*gh/9+(i-7)*gh/9*1.5);
+        i===7?ctx.moveTo(px,py):ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    }
+    ctx.fillStyle='#9090b0'; ctx.font='9px DM Mono,monospace'; ctx.textAlign='center';
+    ctx.fillText('F-x graph',gx+40,gy+14); ctx.textAlign='left';
+
+    document.getElementById('ss-m').textContent=m;
+    document.getElementById('ss-e').textContent=(m*extPerMass).toFixed(1)+' cm';
+    document.getElementById('ss-f').textContent=(m*.98).toFixed(2)+' N';
+    document.getElementById('ss-h').textContent=m<8?'Linear ✓':'Plastic ⚠';
+    anims.ss=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Add masses one at a time and watch the graph');
+};
+
+/* ═══════════════════════════════════════════════════════
+   MOTION
+═══════════════════════════════════════════════════════ */
+
+/* MOTION 1 — Free Fall */
+window.renderFreeFall = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._ffAir=false; window._ffDrop=false; window._ffT=0;
+  let y1=60, y2=60;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Conditions</div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn on" id="ff-vac" onclick="window._ffAir=false;this.classList.add('on');document.getElementById('ff-air').classList.remove('on');window._ffT=0;y1=60;y2=60;window._ffDrop=false">Vacuum</button>
+      <button class="ctrl-btn" id="ff-air" onclick="window._ffAir=true;this.classList.add('on');document.getElementById('ff-vac').classList.remove('on');window._ffT=0;y1=60;y2=60;window._ffDrop=false">With air</button>
+    </div>
+    <div class="ctrl-btns" style="margin-top:.5rem">
+      <button class="ctrl-btn" onclick="window._ffDrop=true;window._ffT=0;y1=60;y2=60">Drop both</button>
+      <button class="ctrl-btn" onclick="window._ffDrop=false;window._ffT=0;y1=60;y2=60">Reset</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">Heavy (5 kg)</div><div class="rdout-val" id="ff-h">Ready</div></div>
+      <div class="rdout"><div class="rdout-lbl">Light (0.1 kg)</div><div class="rdout-val" id="ff-l">Ready</div></div>
+    </div>
+  </div>`);
+
+  const ground=H-52;
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    if(window._ffDrop){
+      window._ffT+=1;
+      const g=0.16;
+      y1=Math.min(60+g*window._ffT*window._ffT*.5, ground-18);
+      const drag=window._ffAir?0.038:0;
+      y2=Math.min(60+g*window._ffT*window._ffT*.5*(1-drag*window._ffT*.015), ground-11);
+    }
+
+    /* ground */
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(0,ground,W2,H-ground);
+    ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,ground); ctx.lineTo(W2,ground); ctx.stroke();
+
+    /* balls */
+    const lx=W2*.32, rx=W2*.68;
+    ctx.beginPath(); ctx.arc(lx,y1,17,0,Math.PI*2); ctx.fillStyle='#4361ee'; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 10px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('5 kg',lx,y1+3.5);
+
+    ctx.beginPath(); ctx.arc(rx,y2,10,0,Math.PI*2); ctx.fillStyle='#dc2626'; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 9px DM Sans,sans-serif';
+    ctx.fillText('0.1',rx,y2+3);
+    ctx.textAlign='left';
+
+    /* land markers */
+    if(y1>=ground-18){ ctx.fillStyle='#0d9488'; ctx.font='bold 12px DM Sans,sans-serif'; ctx.textAlign='center'; ctx.fillText('✓',lx,ground-28); }
+    if(y2>=ground-11){ ctx.fillStyle='#0d9488'; ctx.font='bold 12px DM Sans,sans-serif'; ctx.textAlign='center'; ctx.fillText('✓',rx,ground-22); }
+    ctx.textAlign='left';
+
+    /* label */
+    ctx.fillStyle='#4a4a6a'; ctx.font='11px DM Sans,sans-serif';
+    ctx.fillText(window._ffAir?'Air resistance ON — light ball lags':'Vacuum — both fall identically',10,H-14);
+
+    document.getElementById('ff-h').textContent=y1>=ground-18?'Landed!':'Falling';
+    document.getElementById('ff-l').textContent=y2>=ground-11?'Landed!':'Falling';
+    anims.ff=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Drop both then toggle air resistance');
+};
+
+/* MOTION 2 — Pendulum */
+window.renderPendulum = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  let theta, omega=0, t=0;
+  window._pdL=130; window._pdA=30; theta=30*Math.PI/180;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Controls</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Length</span>
+      <input type="range" min="60" max="180" value="130" oninput="window._pdL=+this.value;theta=window._pdA*Math.PI/180;omega=0;this.nextElementSibling.textContent=this.value+' px'">
+      <span class="ctrl-val">130 px</span>
+    </div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Release angle</span>
+      <input type="range" min="5" max="50" value="30" oninput="window._pdA=+this.value;theta=window._pdA*Math.PI/180;omega=0;this.nextElementSibling.textContent=this.value+'°'">
+      <span class="ctrl-val">30°</span>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">Period (est.)</div><div class="rdout-val" id="pd-p">—</div></div>
+      <div class="rdout"><div class="rdout-lbl">Speed at bottom</div><div class="rdout-val" id="pd-v">—</div></div>
+    </div>
+  </div>`);
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const L=window._pdL, g=9.8, px=W2/2, py=42;
+    const alpha=-g/L*Math.sin(theta); omega+=alpha*.045; theta+=omega*.045;
+
+    const bx=px+L*Math.sin(theta), by=py+L*Math.cos(theta);
+
+    /* ghost trail */
+    for(let i=1;i<=4;i++){
+      const gt=theta-omega*i*.035;
+      ctx.beginPath(); ctx.arc(px+L*Math.sin(gt),py+L*Math.cos(gt),12,0,Math.PI*2);
+      ctx.fillStyle=`rgba(67,97,238,${.12-i*.025})`; ctx.fill();
+    }
+
+    /* string */
+    ctx.strokeStyle='#9090b0'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(bx,by); ctx.stroke();
+
+    /* bob */
+    ctx.beginPath(); ctx.arc(bx,by,14,0,Math.PI*2); ctx.fillStyle='#4361ee'; ctx.fill();
+    ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2); ctx.fillStyle='#4a4a6a'; ctx.fill();
+
+    /* velocity arrow */
+    const spd=Math.abs(omega*L);
+    const vdir=omega>0?1:-1;
+    ctx.strokeStyle='#dc2626'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+vdir*Math.min(spd*.8,38),by); ctx.stroke();
+
+    /* energy bars */
+    const maxH=L*(1-Math.cos(window._pdA*Math.PI/180));
+    const curH=L*(1-Math.cos(theta));
+    const pe=Math.min(1,Math.max(0,curH/maxH)), ke=Math.max(0,1-pe);
+    const bx2=12, bw=40, bH=100, bTop=H-120;
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(bx2,bTop,bw,bH); ctx.fillRect(bx2+bw+8,bTop,bw,bH);
+    ctx.fillStyle='#0d9488'; ctx.fillRect(bx2,bTop+bH*(1-pe),bw,bH*pe);
+    ctx.fillStyle='#4361ee'; ctx.fillRect(bx2+bw+8,bTop+bH*(1-ke),bw,bH*ke);
+    ctx.fillStyle='#9090b0'; ctx.font='9px DM Mono,monospace'; ctx.textAlign='center';
+    ctx.fillText('PE',bx2+bw/2,bTop-5); ctx.fillText('KE',bx2+bw+8+bw/2,bTop-5);
+    ctx.textAlign='left';
+
+    const period=2*Math.PI*Math.sqrt(L/g);
+    document.getElementById('pd-p').textContent=(period*.2).toFixed(2)+'s';
+    document.getElementById('pd-v').textContent=Math.abs(omega*L).toFixed(1);
+    t++; anims.pd=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Change length — watch period change, not amplitude');
+};
+
+/* MOTION 3 — Circular */
+window.renderCircular = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  let angle=0, cut=false, fx=0, fy=0, fvx=0, fvy=0;
+  window._cmSpd=2;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Controls</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Spin speed</span>
+      <input type="range" min="0.5" max="4" step=".1" value="2" oninput="window._cmSpd=+this.value;this.nextElementSibling.textContent=this.value+'×'">
+      <span class="ctrl-val">2×</span>
+    </div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="window._cmCut=true">Cut string!</button>
+      <button class="ctrl-btn" onclick="cut=false;window._cmCut=false">Reset</button>
+    </div>
+  </div>`);
+  window._cmCut=false;
+
+  const cx2=W*.44, cy=H*.5, r=105;
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    angle+=window._cmSpd*.022;
+    const bx=cx2+r*Math.cos(angle), by=cy+r*Math.sin(angle);
+
+    if(window._cmCut && !cut){
+      cut=true; window._cmCut=false;
+      fx=bx; fy=by;
+      fvx=-window._cmSpd*2.2*Math.sin(angle);
+      fvy=window._cmSpd*2.2*Math.cos(angle);
+    }
+
+    /* orbit trace */
+    ctx.beginPath(); ctx.arc(cx2,cy,r,0,Math.PI*2);
+    ctx.strokeStyle='#f0f0f8'; ctx.lineWidth=1.5; ctx.stroke();
+
+    if(!cut){
+      /* string */
+      ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(cx2,cy); ctx.lineTo(bx,by); ctx.stroke();
+
+      /* centripetal force arrow — inward */
+      const fl=34, dx=(cx2-bx)/r, dy=(cy-by)/r;
+      ctx.strokeStyle='#dc2626'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+dx*fl,by+dy*fl); ctx.stroke();
+      /* arrowhead */
+      ctx.fillStyle='#dc2626';
+      ctx.beginPath(); ctx.arc(bx+dx*fl,by+dy*fl,4,0,Math.PI*2); ctx.fill();
+
+      /* velocity arrow — tangential */
+      const vx=-Math.sin(angle)*38, vy=Math.cos(angle)*38;
+      ctx.strokeStyle='#0d9488'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+vx,by+vy); ctx.stroke();
+      ctx.fillStyle='#0d9488'; ctx.beginPath(); ctx.arc(bx+vx,by+vy,4,0,Math.PI*2); ctx.fill();
+
+      /* ball */
+      ctx.beginPath(); ctx.arc(bx,by,13,0,Math.PI*2); ctx.fillStyle='#4361ee'; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx2,cy,5,0,Math.PI*2); ctx.fillStyle='#4a4a6a'; ctx.fill();
+
+      /* legend */
+      ctx.font='11px DM Sans,sans-serif';
+      ctx.fillStyle='#dc2626'; ctx.fillText('● force (inward)',12,20);
+      ctx.fillStyle='#0d9488'; ctx.fillText('● velocity (tangential)',12,36);
+    } else {
+      fx+=fvx*.04; fy+=fvy*.04;
+      ctx.beginPath(); ctx.arc(fx,fy,13,0,Math.PI*2); ctx.fillStyle='#dc2626'; ctx.fill();
+      ctx.fillStyle='#dc2626'; ctx.font='bold 12px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText('Flies off TANGENTIALLY — not outward!',W2/2,H-16);
+      ctx.textAlign='left';
+      if(fx<-20||fx>W2+20||fy<-20||fy>H+20){ cut=false; }
+    }
+    anims.cm=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Cut the string — which way does the ball fly?');
+};
+
+/* ═══════════════════════════════════════════════════════
+   ENERGY
+═══════════════════════════════════════════════════════ */
+
+/* ENERGY 1 — Roller Coaster */
+window.renderRollerCoaster = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  let t=0, energy=1;
+  window._rcH2=120; window._rcFric=0;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Track settings</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Hill 2 height</span>
+      <input type="range" min="20" max="195" value="120" oninput="window._rcH2=+this.value;this.nextElementSibling.textContent=this.value">
+      <span class="ctrl-val">120</span>
+    </div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Friction</span>
+      <input type="range" min="0" max="0.5" step=".05" value="0" oninput="window._rcFric=+this.value;this.nextElementSibling.textContent=(+this.value).toFixed(2);energy=1">
+      <span class="ctrl-val">0.00</span>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">PE</div><div class="rdout-val" id="rc-pe">100%</div></div>
+      <div class="rdout"><div class="rdout-lbl">KE</div><div class="rdout-val" id="rc-ke">0%</div></div>
+    </div>
+  </div>`);
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const ground=H-44, h1=195, h2=window._rcH2;
+    const x0=50, x1=W2*.32, x2=W2*.62, x3=W2-36;
+
+    /* draw track */
+    ctx.beginPath();
+    ctx.moveTo(x0,ground-h1);
+    ctx.bezierCurveTo(x1*.75,ground-h1, x1*.9,ground, x1,ground);
+    ctx.bezierCurveTo(x1*1.08,ground, x2*.85,ground-h2, x2,ground-h2);
+    ctx.bezierCurveTo(x2*1.06,ground-h2, x3,ground-50, x3,ground-50);
+    ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.stroke();
+    ctx.strokeStyle='#4361ee'; ctx.lineWidth=4; ctx.stroke();
+
+    /* car (simple arc along track) */
+    energy=Math.max(0, energy-window._rcFric*.002);
+    const prog=((t*1.2)%360)/360;
+    let carX,carY;
+    if(prog<.32){ const u=prog/.32; carX=x0+(x1-x0)*u; carY=(ground-h1)*(1-u)+ground*u; }
+    else if(prog<.62){ const u=(prog-.32)/.3; carX=x1+(x2-x1)*u; carY=ground*(1-u)+(ground-h2)*u; }
+    else { const u=(prog-.62)/.38; carX=x2+(x3-x2)*u; carY=(ground-h2)*(1-u)+(ground-50)*u; }
+
+    const curH=ground-carY, maxH=h1*energy;
+    const pe=Math.min(1,curH/(h1*energy||1));
+    const ke=Math.max(0,energy-pe*energy);
+
+    /* can't clear hill? show blocked */
+    const blocked=h2>h1*energy && prog>.25 && prog<.45;
+
+    /* energy bars */
+    const bx2=W2-88, barH=H*.55, bTop=(H-barH)/2;
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(bx2,bTop,28,barH); ctx.fillRect(bx2+34,bTop,28,barH);
+    ctx.fillStyle='#0d9488'; ctx.fillRect(bx2,bTop+barH*(1-pe),28,barH*pe);
+    ctx.fillStyle='#4361ee'; ctx.fillRect(bx2+34,bTop+barH*(1-ke/energy||0),28,barH*(ke/energy||0));
+    ctx.fillStyle='#9090b0'; ctx.font='9px DM Mono,monospace'; ctx.textAlign='center';
+    ctx.fillText('PE',bx2+14,bTop-6); ctx.fillText('KE',bx2+48,bTop-6);
+    ctx.textAlign='left';
+
+    /* car */
+    ctx.beginPath(); ctx.arc(carX,carY-9,10,0,Math.PI*2);
+    ctx.fillStyle=blocked?'#dc2626':'#dc2626'; ctx.fill();
+
+    document.getElementById('rc-pe').textContent=Math.round(pe*100)+'%';
+    document.getElementById('rc-ke').textContent=Math.round((ke/(energy||1))*100)+'%';
+    t++; anims.rc=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Raise Hill 2 above the start height — watch the car');
+};
+
+/* ENERGY 2 — Bouncing Ball */
+window.renderBouncingBall = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  const mats=[{n:'Rubber',e:.85,col:'#4361ee'},{n:'Steel',e:.60,col:'#888'},{n:'Clay',e:.12,col:'#c8a97c'}];
+  window._bbM=0; window._bbDrop=false;
+  let by=70, bvy=0, bounces=0, marks=[];
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Ball material</div>
+    <div class="ctrl-btns">
+      ${mats.map((m,i)=>`<button class="ctrl-btn ${i===0?'on':''}" id="bb-${i}" onclick="window._bbM=${i};window._bbDrop=false;by=70;bvy=0;bounces=0;marks=[];mats.forEach((_,j)=>document.getElementById('bb-'+j).classList.toggle('on',j===${i}))">${m.n}</button>`).join('')}
+    </div>
+    <div class="ctrl-btns" style="margin-top:.5rem">
+      <button class="ctrl-btn" onclick="window._bbDrop=true;by=70;bvy=0;bounces=0;marks=[]">Drop</button>
+      <button class="ctrl-btn" onclick="window._bbDrop=false;by=70;bvy=0;bounces=0;marks=[]">Reset</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">Bounces</div><div class="rdout-val" id="bb-n">0</div></div>
+      <div class="rdout"><div class="rdout-lbl">e</div><div class="rdout-val" id="bb-e">0.85</div></div>
+    </div>
+  </div>`);
+
+  const ground=H-48;
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const mat=mats[window._bbM];
+    if(window._bbDrop){ bvy+=0.22; by+=bvy; if(by>=ground-12){ bvy=-Math.abs(bvy)*mat.e; by=ground-12; bounces++; marks.push({y:ground-12,a:1}); if(Math.abs(bvy)<0.6) window._bbDrop=false; } }
+    marks=marks.filter(m=>{ m.a-=.015; return m.a>0; });
+
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(0,ground,W2,H-ground);
+    ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,ground); ctx.lineTo(W2,ground); ctx.stroke();
+
+    marks.forEach(m=>{ ctx.beginPath(); ctx.ellipse(W2/2,m.y,18,4,0,0,Math.PI*2); ctx.fillStyle=`rgba(${mat.col.startsWith('#4')?'67,97,238':'100,100,100'},${m.a*.4})`; ctx.fill(); });
+
+    ctx.beginPath(); ctx.arc(W2/2,by,12,0,Math.PI*2); ctx.fillStyle=mat.col; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1.5; ctx.stroke();
+
+    /* energy meter */
+    const initH=ground-70;
+    const curH=ground-by, ratio=Math.max(0,curH/initH);
+    const ex=12, ew=16, eH=H*.55, eTop=(H-eH)/2;
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(ex,eTop,ew,eH);
+    ctx.fillStyle=mat.col; ctx.fillRect(ex,eTop+eH*(1-ratio),ew,eH*ratio);
+    ctx.fillStyle='#9090b0'; ctx.font='9px DM Mono,monospace'; ctx.textAlign='center';
+    ctx.fillText('E',ex+ew/2,eTop-5); ctx.textAlign='left';
+
+    document.getElementById('bb-n').textContent=bounces;
+    document.getElementById('bb-e').textContent=mat.e;
+    ctx.fillStyle='#4a4a6a'; ctx.font='11px DM Sans,sans-serif';
+    ctx.fillText(`${mat.n} · e = ${mat.e}`,10,H-14);
+    anims.bb=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Drop each material — compare bounce height');
+};
+
+/* ENERGY 3 — Spring Launch */
+window.renderSpringLaunch = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._slC=4; window._slFire=false;
+  let by=-1, bvy=0, peakY=H, launched=false;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Spring compression</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Compression</span>
+      <input type="range" min="1" max="8" value="4" oninput="window._slC=+this.value;this.nextElementSibling.textContent=this.value+' cm';launched=false;by=-1;peakY=H">
+      <span class="ctrl-val">4 cm</span>
+    </div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="window._slFire=true;launched=false;by=-1;peakY=H">Launch!</button>
+      <button class="ctrl-btn" onclick="window._slFire=false;launched=false;by=-1;peakY=H">Reset</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">Spring PE</div><div class="rdout-val" id="sl-pe">—</div></div>
+      <div class="rdout"><div class="rdout-lbl">Peak height</div><div class="rdout-val" id="sl-h">—</div></div>
+    </div>
+  </div>`);
+
+  const groundY=H-48, launchX=W/2;
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const k=50, comp=window._slC, pe=0.5*k*comp*comp, maxH=pe*1.5;
+
+    /* launcher */
+    ctx.fillStyle='#c0c0d4'; ctx.fillRect(W2/2-16,groundY,32,H-groundY);
+    /* spring */
+    const springTop=groundY-20-comp*4;
+    for(let i=0;i<8;i++){
+      const sy=springTop+i*(20+comp*4)/8;
+      ctx.strokeStyle=`hsl(${220+comp*8},60%,55%)`; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(W2/2+(i%2===0?-10:10),sy); ctx.lineTo(W2/2+(i%2===0?10:-10),sy+(20+comp*4)/8); ctx.stroke();
+    }
+
+    if(window._slFire && !launched){ launched=true; by=groundY-12; bvy=-Math.sqrt(maxH*.28); window._slFire=false; }
+    if(launched){ bvy+=0.14; by+=bvy; if(by<peakY) peakY=by; if(by>=groundY-12){ launched=false; by=-1; } }
+
+    /* ball */
+    const ballY=launched?by:groundY-12;
+    ctx.beginPath(); ctx.arc(W2/2,ballY,12,0,Math.PI*2); ctx.fillStyle='#4361ee'; ctx.fill();
+
+    /* peak marker */
+    if(peakY<H-48){
+      ctx.strokeStyle='rgba(67,97,238,.3)'; ctx.lineWidth=1; ctx.setLineDash([5,5]);
+      ctx.beginPath(); ctx.moveTo(W2/2+30,peakY); ctx.lineTo(W2/2+60,peakY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#4361ee'; ctx.font='10px DM Mono,monospace';
+      ctx.fillText(Math.round((groundY-peakY)/4)+' cm',W2/2+62,peakY+4);
+    }
+
+    /* ground */
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(0,groundY,W2,H-groundY);
+    ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W2,groundY); ctx.stroke();
+
+    document.getElementById('sl-pe').textContent=Math.round(pe)+' J';
+    document.getElementById('sl-h').textContent=peakY<H-48?Math.round((groundY-peakY)/4)+' cm':'—';
+    ctx.fillStyle='#4a4a6a'; ctx.font='11px DM Sans,sans-serif';
+    ctx.fillText('PE = ½kx² — energy quadruples when compression doubles',10,H-14);
+    anims.sl=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Try 2 cm vs 4 cm — compare heights');
+};
+
+/* ═══════════════════════════════════════════════════════
+   MOMENTUM
+═══════════════════════════════════════════════════════ */
+
+/* MOMENTUM 1 — Newton's Cradle */
+window.renderCradle = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._crN=1; let crt=0, dir=1;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Balls to pull back</div>
+    <div class="ctrl-btns">
+      ${[1,2,3].map(n=>`<button class="ctrl-btn ${n===1?'on':''}" id="cr-${n}" onclick="window._crN=${n};crt=0;dir=1;[1,2,3].forEach(i=>document.getElementById('cr-'+i).classList.toggle('on',i===${n}))">${n} ball${n>1?'s':''}</button>`).join('')}
+    </div>
+    <div class="ctrl-btns" style="margin-top:.5rem">
+      <button class="ctrl-btn" onclick="crt=0;dir=1">Reset</button>
+    </div>
+  </div>`);
+
+  const N=5, ballR=14, spc=ballR*2+1, topY=50, strL=110;
+  const cx2=W/2;
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    crt+=dir*.035;
+    if(Math.abs(crt)>Math.PI*.26) dir*=-1;
+    const n=window._crN;
+
+    /* frame */
+    ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(cx2-N*spc/2-24,topY); ctx.lineTo(cx2+N*spc/2+24,topY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx2-N*spc/2-24,topY); ctx.lineTo(cx2-N*spc/2-24,topY+30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx2+N*spc/2+24,topY); ctx.lineTo(cx2+N*spc/2+24,topY+30); ctx.stroke();
+
+    for(let i=0;i<N;i++){
+      const ox=cx2+(i-(N-1)/2)*spc;
+      let theta=0;
+      if(i<n) theta=Math.sin(crt)*Math.PI*.22;
+      else if(i>=N-n && dir<0) theta=-Math.sin(crt)*Math.PI*.22;
+      const bx2=ox+strL*Math.sin(theta), by=topY+strL*Math.cos(theta);
+
+      ctx.strokeStyle='#b0b0c8'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(ox,topY); ctx.lineTo(bx2,by); ctx.stroke();
+
+      const grd=ctx.createRadialGradient(bx2-3,by-3,2,bx2,by,ballR);
+      grd.addColorStop(0,'#dde0f8'); grd.addColorStop(1,'#8888aa');
+      ctx.beginPath(); ctx.arc(bx2,by,ballR,0,Math.PI*2);
+      ctx.fillStyle=grd; ctx.fill();
+      ctx.strokeStyle='#7070a0'; ctx.lineWidth=1; ctx.stroke();
+    }
+
+    ctx.fillStyle='#4a4a6a'; ctx.font='11px DM Sans,sans-serif';
+    ctx.fillText(`Pull ${n} → exactly ${n} fly out the other side`,10,H-14);
+    anims.cr=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Change number of balls — test your prediction');
+};
+
+/* MOMENTUM 2 — Inelastic vs Elastic */
+window.renderInelastic = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._inType='elastic'; window._inV=3;
+  let x1=60, x2, v1, v2, hit, running=false;
+  x2=W*.74; v1=3; v2=0; hit=false;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Collision type</div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn on" id="in-el" onclick="window._inType='elastic';document.getElementById('in-el').classList.add('on');document.getElementById('in-cl').classList.remove('on');resetIn()">Spring (elastic)</button>
+      <button class="ctrl-btn" id="in-cl" onclick="window._inType='clay';document.getElementById('in-cl').classList.add('on');document.getElementById('in-el').classList.remove('on');resetIn()">Clay (inelastic)</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:.6rem">
+      <span class="ctrl-lbl">Cart A speed</span>
+      <input type="range" min="1" max="5" value="3" oninput="window._inV=+this.value;this.nextElementSibling.textContent=this.value;resetIn()">
+      <span class="ctrl-val">3</span>
+    </div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="running=true">Run</button>
+      <button class="ctrl-btn" onclick="resetIn()">Reset</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">p before</div><div class="rdout-val" id="in-pb">—</div></div>
+      <div class="rdout"><div class="rdout-lbl">p after</div><div class="rdout-val" id="in-pa">—</div></div>
+    </div>
+  </div>`);
+
+  window.resetIn=()=>{ x1=60; x2=c.offsetWidth*.74; v1=window._inV; v2=0; hit=false; running=false; };
+
+  const m=40;
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    if(running){
+      x1+=v1*.7; x2+=v2*.7;
+      if(!hit && x1+26>=x2-26){
+        hit=true;
+        if(window._inType==='elastic'){ v1=0; v2=window._inV; }
+        else { v1=v2=m*window._inV/(m+m); }
+      }
+      if(x2>W2-30) running=false;
+    }
+
+    const trackY=H*.52;
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(20,trackY,W2-40,7);
+
+    const drawCart=(x,col,lbl)=>{
+      ctx.fillStyle=col; ctx.fillRect(x-25,trackY-34,50,34);
+      ctx.fillStyle='#fff'; ctx.font='bold 11px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(lbl,x,trackY-14); ctx.textAlign='left';
+      ctx.fillStyle='#9090b0';
+      ctx.beginPath(); ctx.arc(x-12,trackY+5,5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+12,trackY+5,5,0,Math.PI*2); ctx.fill();
+    };
+
+    drawCart(x1,'#4361ee','A');
+    if(window._inType==='clay'&&hit) drawCart(x2,'#c8a97c','A+B');
+    else drawCart(x2,'#dc2626','B');
+
+    /* bumper icon */
+    ctx.fillStyle='#9090b0'; ctx.font='10px DM Mono,monospace'; ctx.textAlign='center';
+    ctx.fillText(window._inType==='elastic'?'⬡ Spring bumper':'● Clay bumper',W2/2,H*.32);
+    ctx.textAlign='left';
+
+    const pBefore=Math.round(m*window._inV);
+    const pAfter=Math.round(m*v1+m*v2);
+    document.getElementById('in-pb').textContent=pBefore+' (kg·m/s)';
+    document.getElementById('in-pa').textContent=pAfter+' (kg·m/s)';
+    anims.inl=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Switch bumper type and compare before/after momentum');
+};
+
+/* MOMENTUM 3 — Explosion */
+window.renderExplosion = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._exA=1; window._exB=1;
+  let xa=W/2, xb=W/2, va=0, vb=0, going=false;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Cart masses</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Cart A (left)</span>
+      <input type="range" min="1" max="4" value="1" oninput="window._exA=+this.value;this.nextElementSibling.textContent=this.value+' kg';xa=c.offsetWidth/2;xb=c.offsetWidth/2;va=0;vb=0;going=false">
+      <span class="ctrl-val">1 kg</span>
+    </div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Cart B (right)</span>
+      <input type="range" min="1" max="4" value="1" oninput="window._exB=+this.value;this.nextElementSibling.textContent=this.value+' kg';xa=c.offsetWidth/2;xb=c.offsetWidth/2;va=0;vb=0;going=false">
+      <span class="ctrl-val">1 kg</span>
+    </div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="xa=c.offsetWidth/2;xb=c.offsetWidth/2;va=-window._exB/(window._exA+window._exB)*4;vb=window._exA/(window._exA+window._exB)*4;going=true">Release spring</button>
+      <button class="ctrl-btn" onclick="xa=c.offsetWidth/2;xb=c.offsetWidth/2;va=0;vb=0;going=false">Reset</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">p(A)</div><div class="rdout-val" id="ex-pa">0</div></div>
+      <div class="rdout"><div class="rdout-lbl">p(B)</div><div class="rdout-val" id="ex-pb">0</div></div>
+      <div class="rdout"><div class="rdout-lbl">Total p</div><div class="rdout-val" id="ex-pt">0</div></div>
+    </div>
+  </div>`);
+
+  const trackY=H*.52;
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    if(going){ xa+=va*.55; xb+=vb*.55; }
+
+    ctx.fillStyle='#f0f0f8'; ctx.fillRect(20,trackY,W2-40,7);
+
+    /* spring at centre (before release) */
+    if(!going){
+      ctx.strokeStyle='#d97706'; ctx.lineWidth=2.5;
+      for(let i=0;i<6;i++){
+        ctx.beginPath();
+        ctx.moveTo(W2/2-12+i*4,trackY-20);
+        ctx.lineTo(W2/2-12+i*4,trackY-4);
+        ctx.stroke();
+      }
+    }
+
+    const wA=window._exA*28, wB=window._exB*28;
+    ctx.fillStyle='#4361ee'; ctx.fillRect(xa-wA,trackY-32,wA,32);
+    ctx.fillStyle='#fff'; ctx.font='bold 10px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(`A:${window._exA}kg`,xa-wA/2,trackY-13);
+    ctx.fillStyle='#dc2626'; ctx.fillRect(xb,trackY-32,wB,32);
+    ctx.fillText(`B:${window._exB}kg`,xb+wB/2,trackY-13);
+    ctx.textAlign='left';
+
+    /* wheels */
+    ['#4361ee','#dc2626'].forEach((col,ci)=>{
+      const bx2=ci===0?xa-wA:xb, bw=ci===0?wA:wB;
+      ctx.fillStyle='#9090b0';
+      ctx.beginPath(); ctx.arc(bx2+10,trackY+5,5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(bx2+bw-10,trackY+5,5,0,Math.PI*2); ctx.fill();
+    });
+
+    const pA=(window._exA*va).toFixed(1), pB=(window._exB*vb).toFixed(1);
+    const pT=(window._exA*va+window._exB*vb).toFixed(1);
+    document.getElementById('ex-pa').textContent=pA;
+    document.getElementById('ex-pb').textContent=pB;
+    document.getElementById('ex-pt').textContent=pT+' ← should be 0';
+    anims.ex=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Make A twice as heavy — compare speeds after');
+};
+
+/* ═══════════════════════════════════════════════════════
+   ELECTRICITY
+═══════════════════════════════════════════════════════ */
+
+/* ELECTRICITY 1 — Simple Circuit */
+window.renderSimpleCircuit = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._scClosed=false; let t=0;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Circuit controls</div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" id="sc-sw" onclick="window._scClosed=!window._scClosed;this.textContent=window._scClosed?'Open switch':'Close switch';this.classList.toggle('on',window._scClosed)">Close switch</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">Circuit</div><div class="rdout-val" id="sc-st">Open</div></div>
+      <div class="rdout"><div class="rdout-lbl">Bulb</div><div class="rdout-val" id="sc-bl">Off</div></div>
+    </div>
+  </div>`);
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const cl=window._scClosed;
+    const x0=70,y0=70,x1=W2-70,y1=H-70;
+    const wCol=cl?'#4361ee':'#c0c0d4';
+    const wW=cl?3:2;
+
+    /* wires */
+    ctx.strokeStyle=wCol; ctx.lineWidth=wW;
+    /* bottom */
+    ctx.beginPath(); ctx.moveTo(x0,y1); ctx.lineTo(x1,y1); ctx.stroke();
+    /* left side */
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x0,y1); ctx.stroke();
+    /* right side */
+    ctx.beginPath(); ctx.moveTo(x1,y0); ctx.lineTo(x1,y1); ctx.stroke();
+    /* top left segment */
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(W2/2-38,y0); ctx.stroke();
+    /* top right segment */
+    ctx.beginPath(); ctx.moveTo(W2/2+38,y0); ctx.lineTo(x1,y0); ctx.stroke();
+
+    /* switch */
+    const sx=W2/2;
+    ctx.fillStyle=wCol; ctx.beginPath(); ctx.arc(sx-38,y0,4,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx+38,y0,4,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=wCol; ctx.lineWidth=wW;
+    if(cl){ ctx.beginPath(); ctx.moveTo(sx-38,y0); ctx.lineTo(sx+38,y0); ctx.stroke(); }
+    else { ctx.beginPath(); ctx.moveTo(sx-38,y0); ctx.lineTo(sx+20,y0-26); ctx.stroke(); }
+    ctx.fillStyle='#9090b0'; ctx.font='10px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(cl?'switch (closed)':'switch (open)',sx,y0-34); ctx.textAlign='left';
+
+    /* battery */
+    const bmy=(y0+y1)/2;
+    for(let i=0;i<4;i++){
+      ctx.fillStyle=i%2===0?'#4361ee':'#c0c0d4';
+      ctx.fillRect(x0-7,bmy-28+i*14,14,12);
+    }
+    ctx.fillStyle='#4a4a6a'; ctx.font='bold 10px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('9V',x0,bmy+32); ctx.textAlign='left';
+
+    /* bulb */
+    const blx=x1, bly=(y0+y1)/2;
+    if(cl){
+      ctx.beginPath(); ctx.arc(blx,bly,24,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,220,50,${.15+Math.sin(t*.08)*.05})`; ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(blx,bly,14,0,Math.PI*2);
+    ctx.fillStyle=cl?`rgba(255,210,50,${.7+Math.sin(t*.1)*.15})`:'#f0f0f8';
+    ctx.fill(); ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#4a4a6a'; ctx.font='10px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('bulb',blx,bly+30); ctx.textAlign='left';
+
+    /* current dots */
+    if(cl){
+      const dt=((t*2.2)%260)/260;
+      const segs=[[x0,y0,x1,y0],[x1,y0,x1,y1],[x1,y1,x0,y1],[x0,y1,x0,y0]];
+      const totLen=2*(x1-x0)+2*(y1-y0);
+      let d=dt*totLen;
+      let dotX=x0, dotY=y0;
+      for(const [ax,ay,bx2,by] of segs){
+        const seg=Math.abs(bx2-ax)+Math.abs(by-ay);
+        if(d<seg){ const u=d/seg; dotX=ax+(bx2-ax)*u; dotY=ay+(by-ay)*u; break; } d-=seg;
+      }
+      ctx.beginPath(); ctx.arc(dotX,dotY,5.5,0,Math.PI*2); ctx.fillStyle='#4361ee'; ctx.fill();
+    }
+
+    document.getElementById('sc-st').textContent=cl?'Closed ✓':'Open ✗';
+    document.getElementById('sc-bl').textContent=cl?'Glowing 💡':'Off';
+    t++; anims.sc=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Close the switch — watch current flow around the loop');
+};
+
+/* ELECTRICITY 2 — Series vs Parallel */
+window.renderSeriesParallel = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._spType='series'; window._spB1=true; window._spB2=true; let t=0;
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Wiring</div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn on" id="sp-s" onclick="window._spType='series';document.getElementById('sp-s').classList.add('on');document.getElementById('sp-p').classList.remove('on')">Series</button>
+      <button class="ctrl-btn" id="sp-p" onclick="window._spType='parallel';document.getElementById('sp-p').classList.add('on');document.getElementById('sp-s').classList.remove('on')">Parallel</button>
+    </div>
+    <div class="ctrl-btns" style="margin-top:.5rem">
+      <button class="ctrl-btn" id="sp-b1" onclick="window._spB1=!window._spB1;this.classList.toggle('on',window._spB1)">Bulb 1: ON</button>
+      <button class="ctrl-btn" id="sp-b2" onclick="window._spB2=!window._spB2;this.classList.toggle('on',window._spB2)">Bulb 2: ON</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">Bulb 1</div><div class="rdout-val" id="sp-1">Dim</div></div>
+      <div class="rdout"><div class="rdout-lbl">Bulb 2</div><div class="rdout-val" id="sp-2">Dim</div></div>
+    </div>
+  </div>`);
+
+  function drawBulb(x,y,on,bright,lbl){
+    if(on&&bright>0){
+      ctx.beginPath(); ctx.arc(x,y,20+bright*8,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,220,50,${bright*.2})`; ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(x,y,13,0,Math.PI*2);
+    ctx.fillStyle=on&&bright>0?`rgba(255,${180+bright*40},50,${.5+bright*.35})`:'#f0f0f8';
+    ctx.fill(); ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#4a4a6a'; ctx.font='10px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(lbl,x,y+26); ctx.textAlign='left';
+  }
+
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const b1=window._spB1, b2=window._spB2, type=window._spType;
+    let br1=0,br2=0;
+    if(type==='series'){ const flow=b1&&b2?1:0; br1=flow*.55; br2=flow*.55; }
+    else { br1=b1?1:0; br2=b2?1:0; }
+
+    const battX=60, b1x=W2/2-60, b2x=W2/2+60, top=80, bot=H-60;
+
+    /* battery */
+    for(let i=0;i<4;i++){ ctx.fillStyle=i%2===0?'#4361ee':'#c0c0d4'; ctx.fillRect(battX-7,top+30+i*12,14,10); }
+    ctx.fillStyle='#4a4a6a'; ctx.font='bold 10px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('9V',battX,bot+18); ctx.textAlign='left';
+
+    ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=2;
+
+    if(type==='series'){
+      /* top rail */
+      ctx.beginPath(); ctx.moveTo(battX,top); ctx.lineTo(b1x,top); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(b1x,top); ctx.lineTo(b2x,top); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(b2x,top); ctx.lineTo(W2-40,top); ctx.lineTo(W2-40,bot); ctx.lineTo(battX,bot); ctx.lineTo(battX,top); ctx.stroke();
+      drawBulb(b1x,top,b1,br1,'Bulb 1');
+      drawBulb(b2x,top,b2,br2,'Bulb 2');
+      ctx.fillStyle='#4a4a6a'; ctx.font='11px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText('Series — voltage shared between bulbs',W2/2,H-14); ctx.textAlign='left';
+    } else {
+      /* parallel — two branches */
+      ctx.beginPath(); ctx.moveTo(battX,top); ctx.lineTo(W2-40,top); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(battX,bot); ctx.lineTo(W2-40,bot); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(battX,top); ctx.lineTo(battX,bot); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(W2-40,top); ctx.lineTo(W2-40,bot); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(b1x,top); ctx.lineTo(b1x,bot); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(b2x,top); ctx.lineTo(b2x,bot); ctx.stroke();
+      drawBulb(b1x,(top+bot)/2,b1,br1,'Bulb 1');
+      drawBulb(b2x,(top+bot)/2,b2,br2,'Bulb 2');
+      ctx.fillStyle='#4a4a6a'; ctx.font='11px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText('Parallel — each bulb gets full voltage',W2/2,H-14); ctx.textAlign='left';
+    }
+
+    const stateStr=(br)=>br>=.9?'Bright':br>.3?'Dim':'Off';
+    document.getElementById('sp-1').textContent=stateStr(br1);
+    document.getElementById('sp-2').textContent=stateStr(br2);
+    t++; anims.sp=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Toggle bulbs and switch wiring — note the difference');
+};
+
+/* ELECTRICITY 3 — Ohm's Law */
+window.renderOhmsLaw = function(){
+  const c=cv(); const W=c.offsetWidth, H=340; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  window._ohV=6; window._ohR=3;
+  let viPts=[];
+
+  addCtrl(`<div class="ctrl-card"><div class="ctrl-title">Circuit values</div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Voltage (V)</span>
+      <input type="range" min="1" max="12" value="6" oninput="window._ohV=+this.value;this.nextElementSibling.textContent=this.value+' V';window._ohRecord=true">
+      <span class="ctrl-val">6 V</span>
+    </div>
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Resistance (Ω)</span>
+      <input type="range" min="1" max="12" value="3" oninput="window._ohR=+this.value;this.nextElementSibling.textContent=this.value+' Ω';viPts=[]">
+      <span class="ctrl-val">3 Ω</span>
+    </div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="viPts.push({v:window._ohV,i:window._ohV/window._ohR})">Record point</button>
+      <button class="ctrl-btn" onclick="viPts=[]">Clear graph</button>
+    </div>
+    <div class="readouts" style="margin-top:.6rem">
+      <div class="rdout"><div class="rdout-lbl">Current (A)</div><div class="rdout-val" id="oh-i">2.00</div></div>
+      <div class="rdout"><div class="rdout-lbl">V ÷ I = R</div><div class="rdout-val" id="oh-r">3 Ω</div></div>
+    </div>
+  </div>`);
+  window._ohRecord=false;
+
+  let t=0;
+  function draw(){
+    const W2=c.offsetWidth; c.width=W2;
+    ctx.clearRect(0,0,W2,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W2,H);
+
+    const V=window._ohV, R=window._ohR, I=V/R;
+
+    /* simple circuit diagram left */
+    const cx2=W2*.38, top=70, bot=H-70;
+    ctx.strokeStyle='#c0c0d4'; ctx.lineWidth=2;
+    ctx.strokeRect(cx2-60,top,120,bot-top);
+    /* battery */
+    for(let i=0;i<3;i++){ ctx.fillStyle=i%2===0?'#4361ee':'#c0c0d4'; ctx.fillRect(cx2-8,top+20+i*14,16,12); }
+    ctx.fillStyle='#4a4a6a'; ctx.font='bold 11px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(V+'V',cx2,top+8);
+    /* resistor */
+    ctx.fillStyle='#d97706'; ctx.fillRect(cx2-8,bot-58,16,36);
+    ctx.fillStyle='#fff'; ctx.font='bold 10px DM Mono,monospace';
+    ctx.fillText(R+'Ω',cx2,bot-36);
+    ctx.textAlign='left';
+
+    /* current meter */
+    const meterBright=Math.min(1,I/4);
+    ctx.beginPath(); ctx.arc(cx2+70,top+50,20,0,Math.PI*2);
+    ctx.fillStyle=`rgba(67,97,238,${.1+meterBright*.25})`; ctx.fill();
+    ctx.strokeStyle='#4361ee'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#4361ee'; ctx.font='bold 11px DM Mono,monospace'; ctx.textAlign='center';
+    ctx.fillText('A',cx2+70,top+46);
+    ctx.fillStyle='#4a4a6a'; ctx.font='10px DM Mono,monospace';
+    ctx.fillText(I.toFixed(2),cx2+70,top+62);
+    ctx.textAlign='left';
+
+    /* V-I graph right */
+    const gx=W2*.52, gy=H-50, gw=W2*.42, gh=H*.65;
+    ctx.strokeStyle='#e0e0ec'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(gx,gy-gh); ctx.lineTo(gx,gy); ctx.lineTo(gx+gw,gy); ctx.stroke();
+    ctx.fillStyle='#9090b0'; ctx.font='9px DM Mono,monospace';
+    ctx.fillText('V →',gx+gw-18,gy+12);
+    ctx.fillText('↑ I',gx-16,gy-gh+10);
+
+    /* plot points */
+    viPts.forEach(pt=>{
+      const px=gx+pt.v/12*gw, py=gy-pt.i/4*gh;
+      ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2); ctx.fillStyle='#4361ee'; ctx.fill();
+    });
+
+    /* current V marker */
+    const cX=gx+V/12*gw, cY=gy-I/4*gh;
+    ctx.strokeStyle='rgba(67,97,238,.3)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(cX,gy); ctx.lineTo(cX,cY); ctx.lineTo(gx,cY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(cX,cY,6,0,Math.PI*2); ctx.fillStyle='#dc2626'; ctx.fill();
+
+    if(viPts.length>1){
+      ctx.strokeStyle='rgba(67,97,238,.6)'; ctx.lineWidth=2;
+      ctx.beginPath();
+      viPts.forEach((pt,i)=>{ const px=gx+pt.v/12*gw, py=gy-pt.i/4*gh; i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+      ctx.stroke();
+    }
+
+    document.getElementById('oh-i').textContent=I.toFixed(2)+' A';
+    document.getElementById('oh-r').textContent=(V/I).toFixed(1)+' Ω ✓';
+    t++; anims.oh=requestAnimationFrame(draw);
+  }
+  draw();
+  hint('Adjust voltage, record points to build the V-I graph');
+};
+
+
+/* ══════════════════════════════════════════════════════
+   AI TUTOR
+══════════════════════════════════════════════════════ */
+let tTopic=null, tHistory=[], tMsgCount=0, tAnalysis=null;
+
+const T_DATA = {
+  waves:{
+    name:'Waves', icon:'〰️',
+    opener:'Great! Let\'s start with something that trips up most people. When a water wave passes, what actually moves forward — the water, or something else? Describe exactly what you think happens to a single water molecule as a wave passes by.',
+    sys:'You are a Feynman AI Tutor for Physics. Topic: Waves. Ask ONE probing Socratic question per response. NEVER give the answer. If they are wrong, probe deeper rather than correcting. If they are right, push to the next layer. Max 3 sentences per response. Key misconceptions to detect: particles travel forward with the wave; harder hit = faster wave; waves always need a medium.',
+    misconceptions:['particles travel with the wave','amplitude increases wave speed','all waves need a medium'],
+  },
+  forces:{
+    name:'Forces', icon:'⚡',
+    opener:'Let\'s explore Newton\'s First Law — but not the textbook definition. Imagine you kick a ball on a perfectly frictionless surface in outer space. What happens to the ball, and why? Describe its motion over time.',
+    sys:'You are a Feynman AI Tutor for Physics. Topic: Forces and Newton\'s Laws. Ask ONE probing Socratic question per response. Never give answers. Probe incomplete reasoning. Max 3 sentences. Key misconceptions: objects need a force to keep moving; heavier objects fall faster; action-reaction forces on the same object cancel.',
+    misconceptions:['objects need constant force to maintain motion','heavier = faster falling','action-reaction cancels'],
+  },
+  motion:{
+    name:'Motion', icon:'🏃',
+    opener:'Here\'s a deceptively simple question: if you drop a feather and a hammer in a vacuum at the same height, which hits the ground first? Now explain your reasoning — what physical principle decides this?',
+    sys:'You are a Feynman AI Tutor for Physics. Topic: Kinematics and Motion. Ask ONE probing Socratic question. Never give answers. Probe reasoning gaps. Max 3 sentences. Key misconceptions: velocity and speed are identical; acceleration means speeding up; horizontal and vertical motion are linked.',
+    misconceptions:['velocity equals speed','acceleration only means speeding up','heavier falls faster'],
+  },
+  energy:{
+    name:'Energy', icon:'🔋',
+    opener:'Without using any equations — what is energy? Not a formula, not a definition from a textbook. Describe what energy actually IS, in plain language, as if explaining to a 10-year-old.',
+    sys:'You are a Feynman AI Tutor for Physics. Topic: Energy. Ask ONE probing Socratic question. Never give answers. If they use correct physics, push deeper. Max 3 sentences. Key misconceptions: energy is destroyed when objects stop; potential energy is not real; faster always means more energy.',
+    misconceptions:['energy is destroyed','potential energy is not real','kinetic energy and momentum are the same'],
+  },
+  momentum:{
+    name:'Momentum', icon:'💥',
+    opener:'A heavy truck moves at 5 km/h. A tennis ball moves at 200 km/h. Can they have the same momentum? Walk me through your reasoning — and what does momentum even mean physically?',
+    sys:'You are a Feynman AI Tutor for Physics. Topic: Momentum. Ask ONE probing Socratic question. Never give answers. Max 3 sentences. Key misconceptions: momentum and kinetic energy are the same; bigger mass always means more momentum; momentum is lost in collisions.',
+    misconceptions:['momentum equals kinetic energy','larger objects always have more momentum','momentum is lost in collisions'],
+  },
+  electricity:{
+    name:'Electricity', icon:'⚡',
+    opener:'Without any equations: what is electric current, physically? What is actually flowing, where, and what makes it flow? Describe it as concretely as you can — like describing water in a pipe.',
+    sys:'You are a Feynman AI Tutor for Physics. Topic: Electricity. Ask ONE probing Socratic question. Never give answers. Max 3 sentences. Key misconceptions: current is used up in a circuit; voltage and current are the same; electrons move at light speed.',
+    misconceptions:['current is used up','voltage and current are identical','electrons move at the speed of light'],
+  }
+};
+
+function buildTutorList(){
+  const el=document.getElementById('tutor-topics-list');
+  if(!el) return;
+  el.innerHTML=TOPICS.map(t=>`
+    <button class="t-topic-btn ${tTopic===t.id?'sel':''}" onclick="pickTutorTopic('${t.id}')">
+      <span class="t-icon">${t.icon}</span>
+      <span class="t-name">${T_DATA[t.id]?.name||t.name}</span>
+      <span class="t-badge">${tTopic===t.id?'Active':'New'}</span>
+    </button>`).join('');
+}
+
+function pickTutorTopic(id){
+  tTopic=id; tHistory=[]; tMsgCount=0; tAnalysis=null;
+  document.getElementById('chat-send').disabled=false;
+  document.getElementById('chat-fin').style.display='none';
+  document.getElementById('chat-topic-label').textContent=(T_DATA[id]?.name||id)+' · Feynman Method';
+  const msgs=document.getElementById('chat-msgs');
+  msgs.innerHTML='';
+  buildTutorList();
+  const opener=T_DATA[id]?.opener||'Explain this concept in your own words.';
+  addMsg('ai',opener);
+  tHistory=[{role:'assistant',content:opener}];
+}
+
+function addMsg(role,text){
+  const el=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  div.innerHTML=`<div class="m-av">${role==='ai'?'🤖':'👤'}</div><div class="m-bub">${text.replace(/\n/g,'<br>')}</div>`;
+  el.appendChild(div); el.scrollTop=el.scrollHeight;
+}
+
+function showTyping(){
+  const el=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className='msg ai'; div.id='typing-row';
+  div.innerHTML='<div class="m-av">🤖</div><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  el.appendChild(div); el.scrollTop=el.scrollHeight;
+}
+function hideTyping(){ const e=document.getElementById('typing-row'); if(e)e.remove(); }
+
+function chatKey(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} }
+function chatResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
+
+const FALLBACKS=[
+  'Interesting — can you give me a concrete example from real life that demonstrates what you just said?',
+  'You mentioned that, but let me probe deeper: WHY does that happen at the physical level?',
+  'Good attempt. Now think of a case where your explanation might break down. Can you find a counterexample?',
+  'Let me push a bit further — if you changed one variable in that situation, what would change and what would stay the same?',
+  'Can you connect what you just described to something you observed in the Mini Lab? What did you actually see?',
+  "You said that, but here's what I notice is missing: can you explain the cause, not just the effect?",
+];
+
+async function sendChat(){
+  const inp=document.getElementById('chat-inp');
+  const text=inp.value.trim();
+  if(!text||!tTopic) return;
+  inp.value=''; inp.style.height='auto';
+  addMsg('usr',text);
+  tMsgCount++;
+  tHistory.push({role:'user',content:text});
+  document.getElementById('chat-send').disabled=true;
+  showTyping();
+  try{
+    const msgs=tHistory.slice(-10);
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6', max_tokens:400,
+        system: T_DATA[tTopic].sys + (tMsgCount>=6?' After this many exchanges, you may briefly acknowledge (1 sentence) what they got right before your next probing question.':''),
+        messages:msgs
+      })
+    });
+    const data=await r.json();
+    const reply=data?.content?.[0]?.text||FALLBACKS[tMsgCount%FALLBACKS.length];
+    hideTyping(); addMsg('ai',reply);
+    tHistory.push({role:'assistant',content:reply});
+  }catch(e){
+    hideTyping();
+    const reply=FALLBACKS[tMsgCount%FALLBACKS.length];
+    addMsg('ai',reply);
+    tHistory.push({role:'assistant',content:reply});
+  }
+  document.getElementById('chat-send').disabled=false;
+  if(tMsgCount>=6){
+    document.getElementById('chat-fin').style.display='flex';
+    kickAnalysis();
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   ANALYSIS
+══════════════════════════════════════════════════════ */
+async function kickAnalysis(){
+  if(tAnalysis||!tTopic) return;
+  const userText=tHistory.filter(m=>m.role==='user').map(m=>m.content).join(' ');
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6', max_tokens:700,
+        system:'You are a Physics education assessment AI. Evaluate the student conversation and return ONLY valid JSON, no markdown fences. Schema: {"scientific_claim":0-100,"evidence_integration":0-100,"scientific_reasoning":0-100,"math_translation":0-100,"misconception_resilience":0-100,"structural_simplification":0-100,"bloom_level":1-6,"bloom_label":"string","strengths":["str","str"],"weaknesses":["str","str"],"misconceptions":["str"],"next_topics":["str","str"]}',
+        messages:[{role:'user',content:`Topic: ${T_DATA[tTopic]?.name}. Student responses: "${userText}". Score across 6 dimensions and return JSON only.`}]
+      })
+    });
+    const data=await r.json();
+    const raw=data?.content?.[0]?.text||'{}';
+    tAnalysis=JSON.parse(raw.replace(/```json|```/g,'').trim());
+  }catch(e){ tAnalysis=fallbackAnalysis(userText); }
+}
+
+function fallbackAnalysis(text){
+  const w=text.toLowerCase().split(/\s+/);
+  const hasEv=w.some(x=>['lab','observed','saw','noticed','experiment','measured','wave','current','force'].includes(x));
+  const hasMath=w.some(x=>['formula','equation','=','proportional','v=','f=','p='].includes(x));
+  const hasEx=w.some(x=>['example','like','imagine','suppose','consider','such','for instance'].includes(x));
+  const depth=Math.min(100,w.length*1.3);
+  const B={waves:{sc:72,ei:58,sr:65,mt:38,mr:44,ss:70,bl:3,bll:'Apply'},
+    forces:{sc:68,ei:55,sr:60,mt:42,mr:52,ss:66,bl:3,bll:'Apply'},
+    motion:{sc:75,ei:60,sr:70,mt:45,mr:48,ss:68,bl:3,bll:'Apply'},
+    energy:{sc:70,ei:62,sr:65,mt:40,mr:50,ss:72,bl:3,bll:'Apply'},
+    momentum:{sc:65,ei:50,sr:58,mt:35,mr:45,ss:60,bl:2,bll:'Understand'},
+    electricity:{sc:60,ei:48,sr:55,mt:38,mr:42,ss:62,bl:2,bll:'Understand'}}[tTopic]||{sc:65,ei:55,sr:60,mt:40,mr:48,ss:65,bl:3,bll:'Apply'};
+  return{
+    scientific_claim:Math.min(94,B.sc+(hasEx?8:0)),
+    evidence_integration:Math.min(94,B.ei+(hasEv?14:0)),
+    scientific_reasoning:Math.min(94,B.sr+Math.floor(depth*.05)),
+    math_translation:Math.min(94,B.mt+(hasMath?17:0)),
+    misconception_resilience:Math.min(94,B.mr+tMsgCount*2),
+    structural_simplification:Math.min(94,B.ss+(hasEx?9:0)),
+    bloom_level:B.bl, bloom_label:B.bll,
+    strengths:[hasEv?'Good use of observational evidence from the labs':'Solid baseline conceptual grasp',
+               hasEx?'Effective use of real-world examples':'Confident description of physical phenomena'],
+    weaknesses:[hasMath?'Mathematical translation still developing':'Equations not yet connected to physical meaning',
+                'Misconception resilience — some intuitive errors present'],
+    misconceptions:[T_DATA[tTopic]?.misconceptions?.[0]||'Some intuitive but incorrect reasoning detected'],
+    next_topics:TOPICS.filter(t=>t.id!==tTopic).slice(0,2).map(t=>T_DATA[t.id]?.name||t.name)
+  };
+}
+
+function goAnalysis(){ if(!tAnalysis) kickAnalysis(); showPage('analysis'); }
+
+function renderAnalysis(){
+  const a=tAnalysis;
+  if(!a){ document.getElementById('an-title').textContent='Complete a tutor session first'; return; }
+  const topicName=T_DATA[tTopic]?.name||'Physics';
+  document.getElementById('an-title').textContent=topicName+' — Understanding Map';
+  document.getElementById('an-sub').textContent='Based on your AI Tutor conversation · 6-dimension evaluation';
+
+  // Radar
+  const cv=document.getElementById('radar-cv');
+  if(cv){
+    const W=cv.offsetWidth||300; cv.width=W; cv.height=250;
+    const ctx=cv.getContext('2d');
+    const dims=[a.scientific_claim,a.evidence_integration,a.scientific_reasoning,a.math_translation,a.misconception_resilience,a.structural_simplification];
+    const lbls=['Scientific\nClaim','Evidence\nIntegration','Scientific\nReasoning','Math\nTranslation','Misconception\nResilience','Structural\nSimplify'];
+    const N=6,cx=W/2,cy=125,R=90;
+    ctx.clearRect(0,0,W,250);
+    [.25,.5,.75,1].forEach(f=>{
+      ctx.beginPath();
+      for(let i=0;i<N;i++){const a2=i/N*Math.PI*2-Math.PI/2;i===0?ctx.moveTo(cx+Math.cos(a2)*R*f,cy+Math.sin(a2)*R*f):ctx.lineTo(cx+Math.cos(a2)*R*f,cy+Math.sin(a2)*R*f);}
+      ctx.closePath();ctx.strokeStyle='#e8e8f0';ctx.lineWidth=1;ctx.stroke();
+    });
+    for(let i=0;i<N;i++){const a2=i/N*Math.PI*2-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a2)*R,cy+Math.sin(a2)*R);ctx.strokeStyle='#e8e8f0';ctx.lineWidth=1;ctx.stroke();}
+    // labels
+    for(let i=0;i<N;i++){
+      const a2=i/N*Math.PI*2-Math.PI/2;
+      const lx=cx+Math.cos(a2)*(R+18),ly=cy+Math.sin(a2)*(R+18);
+      ctx.fillStyle='#9090b0';ctx.font='9px DM Sans,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      lbls[i].split('\n').forEach((line,li)=>ctx.fillText(line,lx,ly+(li-.5)*11));
+    }
+    ctx.beginPath();
+    for(let i=0;i<N;i++){const a2=i/N*Math.PI*2-Math.PI/2;const f=dims[i]/100;i===0?ctx.moveTo(cx+Math.cos(a2)*R*f,cy+Math.sin(a2)*R*f):ctx.lineTo(cx+Math.cos(a2)*R*f,cy+Math.sin(a2)*R*f);}
+    ctx.closePath();ctx.fillStyle='rgba(67,97,238,.15)';ctx.fill();ctx.strokeStyle='#4361ee';ctx.lineWidth=2;ctx.stroke();
+    for(let i=0;i<N;i++){const a2=i/N*Math.PI*2-Math.PI/2;const f=dims[i]/100;ctx.beginPath();ctx.arc(cx+Math.cos(a2)*R*f,cy+Math.sin(a2)*R*f,4,0,Math.PI*2);ctx.fillStyle='#4361ee';ctx.fill();}
+  }
+
+  // Dim rows
+  const dimNames=['Scientific Claim','Evidence Integration','Scientific Reasoning','Math Translation','Misconception Resilience','Structural Simplification'];
+  const dimKeys=['scientific_claim','evidence_integration','scientific_reasoning','math_translation','misconception_resilience','structural_simplification'];
+  const colors=['#4361ee','#0d9488','#7c3aed','#d97706','#dc2626','#0891b2'];
+  document.getElementById('dim-rows').innerHTML=dimKeys.map((k,i)=>`
+    <div class="dim-r">
+      <span class="dim-n">${dimNames[i]}</span>
+      <div class="dim-bg"><div class="dim-fill" style="width:${a[k]}%;background:${colors[i]}"></div></div>
+      <span class="dim-pct">${a[k]}</span>
+    </div>`).join('');
+
+  // Insights
+  const str=(a.strengths||[]).map(s=>`<div class="insight-item"><span class="i-ico">✅</span>${s}</div>`).join('');
+  const wk=(a.weaknesses||[]).map(w=>`<div class="insight-item"><span class="i-ico">⚠️</span>${w}</div>`).join('');
+  const mis=(a.misconceptions||[]).map(m=>`<div class="insight-item"><span class="i-ico">🚫</span>${m}</div>`).join('');
+  document.getElementById('an-insights').innerHTML=str+wk+mis;
+
+  // Bloom
+  const BLOOMS=['Remember','Understand','Apply','Analyze','Evaluate','Create'];
+  const bl=a.bloom_level||3;
+  document.getElementById('bloom-name').textContent=a.bloom_label||BLOOMS[bl-1];
+  document.getElementById('bloom-sub').textContent=`Level ${bl} of 6`;
+  document.getElementById('bloom-wrap').innerHTML=BLOOMS.map((b,i)=>`
+    <div class="bloom-row ${i<bl-1?'b-done':i===bl-1?'b-now':''}">${b}</div>`).join('');
+
+  // Resources
+  document.getElementById('an-resources').innerHTML=`
+    <div class="res-item"><div class="res-ico pu">📖</div><div class="res-meta"><h4>AI-Generated Summary</h4><p>${topicName} concept map</p></div></div>
+    <div class="res-item"><div class="res-ico te">🧪</div><div class="res-meta"><h4>Recommended Lab</h4><p>Review the ${topicName} mini labs</p></div></div>
+    <div class="res-item"><div class="res-ico am">💬</div><div class="res-meta"><h4>Re-run AI Tutor</h4><p>Focus on weak dimensions</p></div></div>`;
+
+  // Next topics
+  document.getElementById('an-next').innerHTML=(a.next_topics||[]).map(t=>`
+    <button class="next-btn" onclick="showPage('tutor')"><span>${t}</span><span class="nb-arr">→</span></button>`).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   PLANNER
+══════════════════════════════════════════════════════ */
+function toggleWT(el){ el.classList.toggle('on'); }
+
+async function genPlan(){
+  const btn=document.getElementById('btn-gen');
+  btn.disabled=true; btn.textContent='Generating…';
+  const examDate=document.getElementById('exam-date').value;
+  const hrs=parseInt(document.getElementById('study-hrs').value);
+  const goal=document.getElementById('study-goal').value;
+  const weak=[...document.querySelectorAll('.w-tag.on')].map(t=>t.textContent.trim());
+  const today=new Date();
+  const exam=examDate?new Date(examDate):new Date(today.getTime()+10*864e5);
+  const days=Math.max(1,Math.ceil((exam-today)/864e5));
+  let plan;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6', max_tokens:900,
+        system:'You are a Physics study planner using the Feynman Method. Return ONLY a JSON array, no markdown fences. Each element: {"day":1,"title":"string","focus":"string","tasks":[{"type":"lab|tutor|review","label":"string"}]}. Prioritise conceptual understanding over memorisation.',
+        messages:[{role:'user',content:`Create a ${Math.min(days,14)}-day plan. Weak topics: ${weak.join(', ')||'all topics'}. Hours/day: ${hrs}. Goal: ${goal}. Mix Mini Labs (lab), AI Tutor (tutor), review (review). Last 2-3 days = comprehensive review. JSON array only.`}]
+      })
+    });
+    const data=await r.json();
+    const raw=data?.content?.[0]?.text||'[]';
+    plan=JSON.parse(raw.replace(/```json|```/g,'').trim());
+  }catch(e){ plan=buildFallback(days,weak,hrs); }
+  renderPlan(plan,days,weak);
+  btn.disabled=false; btn.textContent='Regenerate plan →';
+}
+
+function buildFallback(days,weak,hrs){
+  const topics=weak.length?weak:['Waves','Electricity','Forces'];
+  const maxD=Math.min(days,14);
+  const plan=[];
+  const phases=['Foundations','Deep Understanding','Consolidation'];
+  for(let i=0;i<maxD;i++){
+    const isLast=i>=maxD-2;
+    const ti=Math.floor(i*topics.length/Math.max(1,maxD-2));
+    const focus=isLast?'Comprehensive Review':(topics[Math.min(ti,topics.length-1)]||'Review');
+    const phase=i%3;
+    let tasks;
+    if(isLast) tasks=[{type:'review',label:'Full concept review'},{type:'tutor',label:'AI Tutor: mixed topics'},{type:'review',label:'Practice exam questions'}];
+    else if(phase===0) tasks=[{type:'lab',label:`Mini Lab: ${focus}`},{type:'review',label:'Theory deep-read'}];
+    else if(phase===1) tasks=[{type:'tutor',label:`AI Tutor: ${focus}`},{type:'review',label:'Gap analysis review'}];
+    else tasks=[{type:'review',label:'Concept mapping'},{type:'lab',label:`Lab: ${focus} drill`}];
+    if(hrs>=3) tasks.push({type:'review',label:'Extended practice'});
+    plan.push({day:i+1,title:isLast?'Comprehensive Review':`${focus} — ${phases[phase%3]}`,focus,tasks});
+  }
+  return plan;
+}
+
+function renderPlan(plan,days,weak){
+  document.getElementById('ps-days').textContent=days;
+  document.getElementById('ps-topics').textContent=weak.length||TOPICS.length;
+  const labs=plan.reduce((n,d)=>n+(d.tasks||[]).filter(t=>t.type==='lab').length,0);
+  const tutors=plan.reduce((n,d)=>n+(d.tasks||[]).filter(t=>t.type==='tutor').length,0);
+  document.getElementById('ps-labs').textContent=labs;
+  document.getElementById('ps-tutor').textContent=tutors;
+  const tl=document.getElementById('plan-tl');
+  tl.innerHTML=plan.map(d=>`
+    <div class="day-card ${d.day>=plan.length-1?'urg':''}">
+      <div class="day-badge"><div class="d-num">${d.day}</div><div class="d-lbl">Day</div></div>
+      <div class="day-body">
+        <h4>${d.title}</h4>
+        <div class="day-tasks">${(d.tasks||[]).map(t=>`<div class="d-task ${t.type}">${t.label}</div>`).join('')}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('pl-out').classList.add('vis');
+}
+
+
+
+/* ═══════════════════════════════════
+   INIT
+═══════════════════════════════════ */
+buildHome();
+</script>
+</body>
+</html>
